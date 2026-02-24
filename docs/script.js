@@ -357,11 +357,6 @@ if (btnDownload) {
             const marginX = 12;
             const marginY = 12;
             const frameWidth = pageWidth - marginX * 2;
-            const frameHeight = pageHeight - marginY * 2;
-
-            // Outer frame
-            doc.setLineWidth(0.6);
-            doc.rect(marginX, marginY, frameWidth, frameHeight);
 
             let cursorY = marginY + 8;
 
@@ -497,12 +492,12 @@ if (btnDownload) {
             // Line below Grand Total
             doc.line(marginX, finalY + 10, marginX + frameWidth, finalY + 10);
 
-            // Amount in words (left) and Total: ₹ (right)
+            // Amount in words (left) and Total: Rs. (right)
             const words = numberToWords(total) || 'Zero';
             doc.setFont('times', 'normal');
             doc.text(`Amount in Words: ${words} Only`, marginX + 3, finalY + 16);
             doc.setFont('times', 'bold');
-            doc.text('Total: \u20B9 ' + fmt(total), rightEdge, finalY + 16, { align: 'right' });
+            doc.text('Total: Rs. ' + fmt(total), rightEdge, finalY + 16, { align: 'right' });
 
             // Line above bank section
             doc.line(marginX, finalY + 22, marginX + frameWidth, finalY + 22);
@@ -547,6 +542,11 @@ if (btnDownload) {
             doc.setFontSize(9);
             doc.setFont('times', 'normal');
             doc.text('(Authorized Signatory)', marginX + frameWidth - 3, sigTop + 21, { align: 'right' });
+
+            // Dynamic outer border: height based on content, not fixed full page
+            const contentBottom = Math.min(pageHeight - marginY, sigTop + 24);
+            doc.setLineWidth(0.6);
+            doc.rect(marginX, marginY, frameWidth, contentBottom - marginY);
 
             doc.save(fileName);
             showToast('✅ Download Started!');
