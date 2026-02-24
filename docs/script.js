@@ -924,6 +924,7 @@ async function generatePDF(inv, PDFLib, fileName) {
     tableBody.push(['', '', '', '', '', '', '']);
     tableBody.push(['', '', '', '', '', '', '']);
 
+    resetColor(); // ensure black text in table, regardless of prior color state
     // Column alignment: NO=left, NAME=left, HSN/SAC=center, UOM=center, QTY=center, RATE=right, TOTAL=right
     const COL_ALIGN = { 0: 'left', 1: 'left', 2: 'center', 3: 'center', 4: 'center', 5: 'right', 6: 'right' };
 
@@ -931,15 +932,15 @@ async function generatePDF(inv, PDFLib, fileName) {
         startY: Y,
         head: [['NO', 'NAME OF PRODUCT / SERVICE', 'HSN/SAC', 'UOM', 'QTY', 'RATE', 'TOTAL']],
         body: tableBody,
-        styles:     { font: FONT, fontSize: 10, cellPadding: { top: 5, right: 4, bottom: 5, left: 4 }, lineWidth: 0.3, textColor: [0, 0, 0], overflow: 'linebreak' },
+        styles:     { font: FONT, fontSize: 10, cellPadding: { top: 5, right: 3, bottom: 5, left: 3 }, lineWidth: 0.3, textColor: [0, 0, 0], overflow: 'linebreak' },
         headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold', lineWidth: 0.4, fontSize: 10 },
         columnStyles: {
-            0: { cellWidth: 22 },   // NO
-            1: { cellWidth: 62 },   // NAME OF PRODUCT / SERVICE
-            2: { cellWidth: 20 },   // HSN/SAC
-            3: { cellWidth: 16 },   // UOM
-            4: { cellWidth: 14 },   // QTY
-            5: { cellWidth: 26 },   // RATE
+            0: { cellWidth: 14 },   // NO
+            1: { cellWidth: 58 },   // NAME OF PRODUCT / SERVICE
+            2: { cellWidth: 26 },   // HSN/SAC — wide enough for 'HSN/SAC' on one line
+            3: { cellWidth: 20 },   // UOM — 'UOM' needs ~12mm text + 6mm padding
+            4: { cellWidth: 15 },   // QTY
+            5: { cellWidth: 27 },   // RATE
             6: { cellWidth: 26 },   // TOTAL
         },
         didParseCell(data) {
@@ -955,7 +956,7 @@ async function generatePDF(inv, PDFLib, fileName) {
     // ── GRAND TOTAL ROW ──────────────────────────────────────────
     hLine(Y, 0.6);
     Y += 7;
-    setFont('bold', 11);
+    setFont('bold', 12);
     doc.text('Grand Total', MX + 4, Y);
     doc.text('Rs. ' + fmt(total), MX + FW - 4, Y, { align: 'right' });
     Y += 5;
@@ -965,7 +966,7 @@ async function generatePDF(inv, PDFLib, fileName) {
     // ── AMOUNT IN WORDS ──────────────────────────────────────────
     setFont('normal', 9.5);
     const wordsStr  = 'Amount in Words: ' + safeText(numberToWords(total)) + ' Only';
-    const wordsLns  = doc.splitTextToSize(wordsStr, FW - 55);
+    const wordsLns  = doc.splitTextToSize(wordsStr, FW * 0.62);
     doc.text(wordsLns, MX + 4, Y);
     setFont('bold', 11);
     doc.text('Total: Rs. ' + fmt(total), MX + FW - 4, Y, { align: 'right' });
