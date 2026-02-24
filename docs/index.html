@@ -649,6 +649,70 @@
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
+
+        /* ── Security Gate ─────────────────────────────────────── */
+        #security-gate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f172a;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .gate-card {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .gate-card h2 {
+            margin-bottom: 12px;
+            font-size: 24px;
+        }
+
+        .gate-card p {
+            color: #94a3b8;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .gate-card input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #fff;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .gate-card button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .gate-card button:hover {
+            background: var(--primary-dk);
+        }
     </style>
 </head>
 
@@ -663,6 +727,18 @@
     </nav>
 
     <div class="page">
+
+        <!-- Security Gate -->
+        <div id="security-gate">
+            <div class="gate-card">
+                <h2>Authorized Access Only</h2>
+                <p>Please enter the security password to access the Bill Generator.</p>
+                <input type="password" id="gate-pass" placeholder="Enter password" />
+                <button id="gate-btn">Verify Access</button>
+                <div id="gate-error" style="color: #ef4444; margin-top: 12px; font-size: 14px; display: none;">Invalid
+                    password. Please try again.</div>
+            </div>
+        </div>
 
         <!-- ═══ TAB 1: FORM INPUT ═══ -->
         <div class="section active" id="sec-form">
@@ -1134,9 +1210,41 @@
             });
         });
 
+        document.getElementById('btn-back-edit').addEventListener('click', () => showSection('form'));
+
+        /* ── Auth Logic ────────────────────────────────────────── */
+        const AUTH_KEY = 'DEVI@2026';
+
+        function checkAuth() {
+            if (sessionStorage.getItem('dt_auth') === 'true') {
+                document.getElementById('security-gate').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            } else {
+                document.getElementById('security-gate').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        document.getElementById('gate-btn').addEventListener('click', () => {
+            const pass = document.getElementById('gate-pass').value;
+            if (pass === AUTH_KEY) {
+                sessionStorage.setItem('dt_auth', 'true');
+                checkAuth();
+            } else {
+                document.getElementById('gate-error').style.display = 'block';
+                document.getElementById('gate-pass').value = '';
+                document.getElementById('gate-pass').focus();
+            }
+        });
+
+        document.getElementById('gate-pass').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('gate-btn').click();
+        });
+
+        window.addEventListener('load', checkAuth);
+
         document.getElementById('btn-reset-form').addEventListener('click', resetForm);
         document.getElementById('btn-new2').addEventListener('click', () => { resetForm(); showSection('form'); });
-        document.getElementById('btn-back-edit').addEventListener('click', () => showSection('form'));
 
         function resetForm() {
             document.getElementById('f-invNo').value = '';
