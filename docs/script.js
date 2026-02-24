@@ -1,4 +1,4 @@
-/* Devi Technical Services — Bill Generator
+﻿/* Devi Technical Services — Bill Generator
    Modular, no-backend, pure JS (jsPDF + PapaParse)
    ═══════════════════════════════════════════════════════════════ */
 
@@ -812,95 +812,108 @@ if (btnDownload) {
 }
 
 /**
- * generatePDF — modular, reusable PDF builder.
- * Fixed-width column layout, address wrapping, sig-section overflow guard.
+ * generatePDF — matches reference layout exactly.
+ * Double-line header border, ALL CAPS address, BILL with lines above+below,
+ * underlined "Details of Receiver" heading, fixed colon column, wide NO column.
  */
 async function generatePDF(inv, PDFLib, fileName) {
     const doc = new PDFLib({ orientation: 'p', unit: 'mm', format: 'a4', putOnlyUsedFonts: true });
 
-    const PW = doc.internal.pageSize.getWidth();   // 210 mm
-    const PH = doc.internal.pageSize.getHeight();  // 297 mm
-    const MX = 12;   // left/right margin
-    const FW = PW - MX * 2;  // frame width
+    const PW   = doc.internal.pageSize.getWidth();
+    const PH   = doc.internal.pageSize.getHeight();
+    const MX   = 12;
+    const FW   = PW - MX * 2;
     const FONT = 'times';
 
-    // ── Helpers ────────────────────────────────────────────────
-    const setFont = (style, size) => { doc.setFont(FONT, style); doc.setFontSize(size); };
-    const setColor = (r, g, b) => doc.setTextColor(r, g, b);
-    const resetColor = () => setColor(0, 0, 0);
-    const hLine = (y, lw = 0.35) => { doc.setLineWidth(lw); doc.line(MX, y, MX + FW, y); };
-    const vLine = (x, y1, y2, lw = 0.35) => { doc.setLineWidth(lw); doc.line(x, y1, x, y2); };
-    const safeText = (s) => pdfSafe(s);
+    const setFont    = (style, size) => { doc.setFont(FONT, style); doc.setFontSize(size); };
+    const setColor   = (r, g, b)     => doc.setTextColor(r, g, b);
+    const resetColor = ()            => setColor(0, 0, 0);
+    const hLine      = (y, lw = 0.4) => { doc.setLineWidth(lw); doc.line(MX, y, MX + FW, y); };
+    const vLine      = (x, y1, y2, lw = 0.4) => { doc.setLineWidth(lw); doc.line(x, y1, x, y2); };
+    const safeText   = (s) => pdfSafe(s);
 
-    let Y = MX + 6;  // cursor Y
+    let Y = MX + 8;
 
-    // ── HEADER ─────────────────────────────────────────────────
-    setFont('bold', 22);
+    // ── HEADER ──────────────────────────────────────────────────
+    setFont('bold', 24);
     setColor(198, 40, 40);
     doc.text('DEVI TECHNICAL SERVICES', PW / 2, Y, { align: 'center' });
+    Y += 10;
+
+    // Address ALL CAPS, two lines
+    setFont('normal', 9);
+    resetColor();
+    doc.text('A-166, RAJU PARK, NEAR DEVALI VILLAGE,', PW / 2, Y, { align: 'center' });
+    Y += 5;
+    doc.text('KHANPUR, SOUTH DELHI, NEW DELHI - 110062', PW / 2, Y, { align: 'center' });
     Y += 7;
 
-    setFont('normal', 9.5);
-    resetColor();
-    doc.text('A-166, Raju Park, Near Devali Village, Khanpur, South Delhi, New Delhi - 110062', PW / 2, Y, { align: 'center' });
-    Y += 6;
-    hLine(Y);
+    // Double line below header
+    hLine(Y, 0.6);
+    Y += 1.2;
+    hLine(Y, 0.6);
     Y += 6;
 
-    // ── BILL TITLE ─────────────────────────────────────────────
+    // ── BILL TITLE ───────────────────────────────────────────────
+    hLine(Y, 0.5);          // line ABOVE
+    Y += 6;
     setFont('bold', 14);
     doc.text('BILL', PW / 2, Y, { align: 'center' });
     Y += 5;
-    hLine(Y);
+    hLine(Y, 0.5);          // line BELOW
     Y += 6;
 
-    // ── META + RECEIVER (two-column layout) ────────────────────
+    // ── META + RECEIVER ──────────────────────────────────────────
     const metaStartY = Y;
-    const LX = MX + 3;          // left column text X
-    const RX = MX + FW / 2 + 4; // right column text X
-    const MID = MX + FW / 2;     // divider X
+    const LX  = MX + 5;
+    const COL = LX + 22;          // colon position (left side)
+    const MID = MX + FW / 2;      // vertical divider X
+    const RX  = MID + 6;          // right column label X
+    const RVX = RX + 22;          // right column value X
 
-    // Left column
-    setFont('normal', 10);
-    doc.text('Bill No.   :', LX, Y);
-    setFont('bold', 10);
-    doc.text(safeText(inv.invoiceNumber || '—'), LX + 28, Y);
+    // Left: Bill No.
+    setFont('bold', 10.5);
+    doc.text('Bill No.', LX, Y);
+    setFont('normal', 10.5);
+    doc.text(': ' + safeText(inv.invoiceNumber || '-'), COL, Y);
+    Y += 8;
 
-    Y += 7;
-    setFont('normal', 10);
-    doc.text('Bill Date  :', LX, Y);
-    setFont('bold', 10);
-    doc.text(formatDate(inv.invoiceDate) || '—', LX + 28, Y);
+    // Left: Bill Date
+    setFont('bold', 10.5);
+    doc.text('Bill Date', LX, Y);
+    setFont('normal', 10.5);
+    doc.text(': ' + (formatDate(inv.invoiceDate) || '-'), COL, Y);
 
-    // Right column (starts at metaStartY)
+    // Right column (anchored at metaStartY)
     let RY = metaStartY;
-    setFont('bold', 10);
-    doc.text('Details of Receiver | Billed to:', RX, RY);
-    RY += 7;
+    setFont('bold', 10.5);
+    const hdText = 'Details of Receiver | Billed to:';
+    doc.text(hdText, RX, RY);
+    doc.setLineWidth(0.3);
+    doc.line(RX, RY + 1.2, RX + doc.getTextWidth(hdText), RY + 1.2);
+    RY += 9;
 
-    setFont('normal', 10);
-    doc.text('Name    :', RX, RY);
-    setFont('bold', 10);
-    // Wrap long receiver name
-    const nameLines = doc.splitTextToSize(safeText(inv.receiverName || '—'), FW / 2 - 24);
-    doc.text(nameLines, RX + 22, RY);
-    RY += Math.max(1, nameLines.length) * 5 + 2;
+    setFont('bold', 10.5);
+    doc.text('Name', RX, RY);
+    setFont('normal', 10.5);
+    const nmLines = doc.splitTextToSize(safeText(inv.receiverName || '-'), FW / 2 - 34);
+    doc.text(nmLines, RVX, RY);
+    RY += Math.max(1, nmLines.length) * 6 + 3;
 
-    setFont('normal', 10);
-    doc.text('Address :', RX, RY);
-    // Wrap long address
-    const addrStr = safeText((inv.receiverAddr || '').replace(/\n/g, ', '));
-    const addrLines = doc.splitTextToSize(addrStr, FW / 2 - 24);
-    doc.text(addrLines, RX + 22, RY);
-    RY += Math.max(1, addrLines.length) * 5 + 2;
+    setFont('bold', 10.5);
+    doc.text('Address', RX, RY);
+    setFont('normal', 10.5);
+    const addrStr  = safeText((inv.receiverAddr || '').replace(/\n/g, ', '));
+    const adLines  = doc.splitTextToSize(addrStr, FW / 2 - 34);
+    doc.text(adLines, RVX, RY);
+    RY += Math.max(1, adLines.length) * 6 + 3;
 
-    // Move Y past whichever column is taller
-    Y = Math.max(Y + 8, RY + 2);
-    vLine(MID, metaStartY - 4, Y);
-    hLine(Y);
-    Y += 4;
+    Y = Math.max(Y + 10, RY + 4);
+    vLine(MID, metaStartY - 5, Y);
+    hLine(Y, 0.5);
+    Y += 2;
 
-    // ── ITEMS TABLE via autoTable ───────────────────────────────
+    // ── ITEMS TABLE ──────────────────────────────────────────────
     const total = inv.items.reduce((s, it) => s + (it.qty || 0) * (it.rate || 0), 0);
 
     const tableBody = inv.items.map((it, i) => [
@@ -913,31 +926,29 @@ async function generatePDF(inv, PDFLib, fileName) {
         fmt((it.qty ?? 0) * (it.rate ?? 0)),
     ]);
 
-    // Padding rows
+    // Padding rows (keep at least 2)
     tableBody.push(['', '', '', '', '', '', '']);
     tableBody.push(['', '', '', '', '', '', '']);
 
-    // COL_ALIGN: forced per-column alignment applied to BOTH head and body via didParseCell
-    // This works on all jsPDF-autotable v3.x versions (more reliable than headStyles+columnStyles)
-    const COL_ALIGN = { 0: 'center', 1: 'left', 2: 'center', 3: 'center', 4: 'center', 5: 'right', 6: 'right' };
+    // Column alignment: NO=left, NAME=left, HSN/SAC=center, UOM=center, QTY=center, RATE=right, TOTAL=right
+    const COL_ALIGN = { 0: 'left', 1: 'left', 2: 'center', 3: 'center', 4: 'center', 5: 'right', 6: 'right' };
 
     doc.autoTable({
         startY: Y,
         head: [['NO', 'NAME OF PRODUCT / SERVICE', 'HSN/SAC', 'UOM', 'QTY', 'RATE', 'TOTAL']],
         body: tableBody,
-        styles: { font: FONT, fontSize: 10, cellPadding: 3, lineWidth: 0.2, textColor: [0, 0, 0], overflow: 'linebreak' },
-        headStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold', lineWidth: 0.3 },
+        styles:     { font: FONT, fontSize: 10, cellPadding: { top: 5, right: 4, bottom: 5, left: 4 }, lineWidth: 0.3, textColor: [0, 0, 0], overflow: 'linebreak' },
+        headStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold', lineWidth: 0.4, fontSize: 10 },
         columnStyles: {
-            0: { cellWidth: 16 },  // NO  — wide enough, never wraps
-            1: { cellWidth: 62 },  // NAME
-            2: { cellWidth: 22 },  // HSN/SAC — fits on one line
-            3: { cellWidth: 14 },  // UOM
-            4: { cellWidth: 12 },  // QTY
-            5: { cellWidth: 26 },  // RATE
-            6: { cellWidth: 26 },  // TOTAL
+            0: { cellWidth: 22 },   // NO
+            1: { cellWidth: 62 },   // NAME OF PRODUCT / SERVICE
+            2: { cellWidth: 20 },   // HSN/SAC
+            3: { cellWidth: 16 },   // UOM
+            4: { cellWidth: 14 },   // QTY
+            5: { cellWidth: 26 },   // RATE
+            6: { cellWidth: 26 },   // TOTAL
         },
         didParseCell(data) {
-            // Force halign on every cell — overrides any default left-align
             const align = COL_ALIGN[data.column.index];
             if (align) data.cell.styles.halign = align;
         },
@@ -947,81 +958,71 @@ async function generatePDF(inv, PDFLib, fileName) {
 
     Y = (doc.lastAutoTable?.finalY ?? Y + 40) + 1;
 
-    // ── GRAND TOTAL ROW ─────────────────────────────────────────
-    hLine(Y, 0.5);
-    Y += 6;
-    setFont('bold', 10.5);
-    doc.text('Grand Total', MX + 3, Y);
+    // ── GRAND TOTAL ROW ──────────────────────────────────────────
+    hLine(Y, 0.6);
+    Y += 7;
     setFont('bold', 11);
-    doc.text('Rs. ' + fmt(total), MX + FW - 3, Y, { align: 'right' });
+    doc.text('Grand Total', MX + 4, Y);
+    doc.text('Rs. ' + fmt(total), MX + FW - 4, Y, { align: 'right' });
     Y += 5;
-    hLine(Y, 0.5);
+    hLine(Y, 0.6);
     Y += 7;
 
-    // ── AMOUNT IN WORDS ─────────────────────────────────────────
+    // ── AMOUNT IN WORDS ──────────────────────────────────────────
     setFont('normal', 9.5);
-    const wordsStr = 'Amount in Words: ' + safeText(numberToWords(total)) + ' Only';
-    const wordsLines = doc.splitTextToSize(wordsStr, FW - 50);
-    doc.text(wordsLines, MX + 3, Y);
-    setFont('bold', 10.5);
-    doc.text('Total: Rs. ' + fmt(total), MX + FW - 3, Y, { align: 'right' });
-    Y += Math.max(1, wordsLines.length) * 5 + 2;
+    const wordsStr  = 'Amount in Words: ' + safeText(numberToWords(total)) + ' Only';
+    const wordsLns  = doc.splitTextToSize(wordsStr, FW - 55);
+    doc.text(wordsLns, MX + 4, Y);
+    setFont('bold', 11);
+    doc.text('Total: Rs. ' + fmt(total), MX + FW - 4, Y, { align: 'right' });
+    Y += Math.max(1, wordsLns.length) * 5 + 3;
     hLine(Y, 0.5);
     Y += 7;
 
     // ── BANK DETAILS ─────────────────────────────────────────────
     const bankLines = (inv.bankText || '').split('\n').filter(Boolean);
     setColor(198, 40, 40);
-    setFont('bold', 10);
+    setFont('bold', 10.5);
     bankLines.forEach(line => {
-        const wrapped = doc.splitTextToSize(safeText(line), FW - 6);
+        const wrapped = doc.splitTextToSize(safeText(line), FW - 8);
         doc.text(wrapped, PW / 2, Y, { align: 'center' });
-        Y += wrapped.length * 5 + 1;
+        Y += wrapped.length * 5.5 + 1;
     });
     resetColor();
     Y += 4;
 
-    // ── SIGNATURE SECTION ─────────────────────────────────────────
-    const SIG_H = 30;
-    // Overflow guard: start a new page if not enough room
-    if (Y + SIG_H > PH - MX) {
-        doc.addPage();
-        Y = MX + 6;
-    }
+    // ── SIGNATURE SECTION ────────────────────────────────────────
+    const SIG_H = 32;
+    if (Y + SIG_H > PH - MX) { doc.addPage(); Y = MX + 6; }
 
     hLine(Y, 0.4);
     const sigTop = Y;
     vLine(MID, sigTop, sigTop + SIG_H, 0.4);
 
-    // Left: Receiver sign
     setFont('normal', 9);
     doc.text('(Receiver Name and Sign)', MX + 4, sigTop + SIG_H - 4);
 
-    // Right: company + signature image + signatory label
-    const RHX = MX + FW * 0.75;  // center of right half
-    setFont('bold', 10);
+    const RHX = MX + FW * 0.75;
+    setFont('bold', 10.5);
     doc.text('For Devi Technical Services', RHX, sigTop + 7, { align: 'center' });
 
-    // Load and embed signature image
     try {
         const sigImg = await new Promise((resolve, reject) => {
             const img = new Image();
             img.crossOrigin = 'Anonymous';
-            img.onload = () => resolve(img);
+            img.onload  = () => resolve(img);
             img.onerror = reject;
-            img.src = 'Sign.png';
+            img.src     = 'Sign.png';
         });
-        doc.addImage(sigImg, 'PNG', RHX - 18, sigTop + 9, 36, 13);
-    } catch {
-        // Signature image not found — skip silently
-    }
+        doc.addImage(sigImg, 'PNG', RHX - 18, sigTop + 9, 36, 14);
+    } catch { /* signature image not found — skip */ }
 
-    doc.setLineWidth(0.4);
-    doc.line(RHX - 22, sigTop + 24, RHX + 22, sigTop + 24);
+    doc.setLineWidth(0.35);
+    doc.line(RHX - 22, sigTop + 25, RHX + 22, sigTop + 25);
     setFont('normal', 8.5);
-    doc.text('(Authorized Signatory)', RHX, sigTop + 28, { align: 'center' });
+    doc.text('(Authorized Signatory)', RHX, sigTop + 30, { align: 'center' });
 
-    // ── OUTER BORDER ────────────────────────────────────────────
+    // ── OUTER BORDER ─────────────────────────────────────────────
     const contentBottom = sigTop + SIG_H;
     doc.setLineWidth(0.6);
     doc.rect(MX, MX, FW, contentBottom - MX);
