@@ -1,4 +1,6 @@
-/* Devi Technical Services — Bill Generator Logic */
+/* Devi Technical Services — Bill Generator Logic (refactored, jsPDF-based) */
+
+const { jsPDF } = window.jspdf || {};
 
 const PRODUCTS = [
     { name: "Canon IR-3225 Photocopier & Network Printer Rent", hsn: "", uom: "NOS", rate: 3600 },
@@ -315,80 +317,189 @@ function parseCSV(rows) {
     return inv;
 }
 
-/* ── Helpers ────────────────────────────────────────────── */
+/* ── PDF Generation (jsPDF, vector-based) ───────────────── */
 const btnDownload = document.getElementById('btn-download');
 if (btnDownload) {
     btnDownload.addEventListener('click', () => {
-        const src = document.getElementById('invoice-render');
-        if (!src || !src.innerHTML.trim()) {
-            alert('Please generate the bill first.');
+        const inv = lastInvoice || collectFormData();
+        if (!inv) return;
+
+        if (!jsPDF) {
+            alert('PDF engine failed to load.');
             return;
         }
 
-        const currentInvoice = lastInvoice || {};
-
-        const customerName = (currentInvoice.receiverName || document.getElementById('info-customer').textContent || 'Client').trim();
-        const invoiceNumber = (currentInvoice.invoiceNumber || document.getElementById('info-number').textContent || '').trim();
-        const rawDate = (currentInvoice.invoiceDate || document.getElementById('f-invDate').value || new Date().toISOString().split('T')[0]).trim();
-        const safeDate = rawDate.replace(/[\/\-]/g, '') || new Date().toISOString().split('T')[0].replace(/-/g, '');
-
+        const customerName = inv.receiverName || 'Client';
+        const invoiceNumber = inv.invoiceNumber || '';
+        const safeDateRaw = inv.invoiceDate || new Date().toISOString().split('T')[0];
+        const safeDate = safeDateRaw.replace(/[\/\-]/g, '') || new Date().toISOString().split('T')[0].replace(/-/g, '');
         const nameParts = customerName.split(/\s+/).filter(p => p.length > 0).slice(0, 2);
         const safeName = nameParts.length > 0 ? nameParts.join('').replace(/[^a-zA-Z0-9]/g, '') : 'Client';
         const fileNamePrefix = invoiceNumber ? `${invoiceNumber}_` : '';
         const fileName = `${fileNamePrefix}${safeName}_Bill_${safeDate}.pdf`;
 
-        const opt = {
-            // Extra margin so the black border has clean white space around it
-            margin: [20, 15, 20, 15], // T, L, B, R (in mm because jsPDF unit is mm)
-            filename: fileName,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-                scale: 3,
-                useCORS: true,
-                logging: false,
-                width: 800, // Fixed standardized width for consistent capture
-                windowWidth: 800
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['css'], avoid: '#invoice-render-pdf' }
-        };
-
         showToast('🔄 Generating PDF...');
 
-        // Use an off-screen clone for stable, device-independent capture
-        const wrapper = document.createElement('div');
-        wrapper.style.position = 'fixed';
-        wrapper.style.left = '0';
-        wrapper.style.top = '0';
-        wrapper.style.width = '100%';
-        wrapper.style.zIndex = '999999';
-        wrapper.style.opacity = '0';
-        wrapper.style.pointerEvents = 'none';
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
 
-        const clone = src.cloneNode(true);
-        clone.id = 'invoice-render-pdf';
-        clone.style.width = '650px';
-        clone.style.minWidth = '650px';
-        clone.style.maxWidth = '650px';
-        clone.style.margin = '0 auto';
-        clone.style.border = '2px solid #000';
-        clone.style.boxShadow = 'none';
-        clone.style.transform = 'none';
-        clone.style.transformOrigin = 'top left';
+        const marginX = 12;
+        const marginY = 12;
+        const frameWidth = pageWidth - marginX * 2;
+        const frameHeight = pageHeight - marginY * 2;
 
-        wrapper.appendChild(clone);
-        document.body.appendChild(wrapper);
+        // Outer frame
+        doc.setLineWidth(0.6);
+        doc.rect(marginX, marginY, frameWidth, frameHeight);
 
-        html2pdf().set(opt).from(clone).save().then(() => {
-            showToast('✅ Download Started!');
-        }).catch(err => {
-            console.error('PDF Error:', err);
-            alert('PDF generation failed.');
-        }).finally(() => {
-            if (wrapper.parentNode) {
-                wrapper.parentNode.removeChild(wrapper);
-            }
+        let cursorY = marginY + 8;
+
+        // Header
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(20);
+        doc.setTextColor(198, 40, 40);
+        doc.text('DEVI TECHNICAL SERVICES', pageWidth / 2, cursorY, { align: 'center' });
+
+        cursorY += 6;
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        doc.text('A-166, Raju Park, Near Devali Village, Khanpur, South Delhi, New Delhi-110062', pageWidth / 2, cursorY, { align: 'center' });
+
+        cursorY += 8;
+        doc.setLineWidth(0.4);
+        doc.line(marginX, cursorY, marginX + frameWidth, cursorY);
+
+        // Bill title
+        cursorY += 8;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.text('BILL', marginX + 3, cursorY);
+
+        cursorY += 4;
+        doc.line(marginX, cursorY, marginX + frameWidth, cursorY);
+
+        // Meta + receiver block
+        cursorY += 6;
+        const metaLeftX = marginX + 3;
+        const metaRightX = marginX + frameWidth / 2 + 3;
+
+        doc.setFontSize(10);
+        doc.text('Bill No.:', metaLeftX, cursorY);
+        doc.setFont('helvetica', 'bold');
+        doc.text(inv.invoiceNumber || '-', metaLeftX + 20, cursorY);
+
+        doc.setFont('helvetica', 'normal');
+        doc.text('Bill Date:', metaLeftX, cursorY + 6);
+        doc.setFont('helvetica', 'bold');
+        doc.text(formatDate(inv.invoiceDate) || '-', metaLeftX + 20, cursorY + 6);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('Details of Receiver | Billed to:', metaRightX, cursorY);
+
+        doc.setFont('helvetica', 'normal');
+        doc.text('Name:', metaRightX, cursorY + 6);
+        doc.text(inv.receiverName || '-', metaRightX + 18, cursorY + 6);
+
+        const addressLines = (inv.receiverAddr || '').split('\n');
+        doc.text('Address:', metaRightX, cursorY + 12);
+        const addrYStart = cursorY + 12;
+        addressLines.forEach((line, i) => {
+            doc.text(line || '-', metaRightX + 18, addrYStart + i * 5);
         });
+
+        cursorY = addrYStart + Math.max(1, addressLines.length) * 5 + 4;
+        doc.line(marginX, cursorY, marginX + frameWidth, cursorY);
+
+        // Items table via autoTable
+        const body = inv.items.map((it, idx) => ([
+            String(idx + 1),
+            it.description || '',
+            it.hsn || '',
+            it.uom || 'NOS',
+            String(it.qty || 0),
+            fmt(it.rate || 0),
+            fmt((it.qty || 0) * (it.rate || 0))
+        ]));
+
+        const total = inv.items.reduce((s, i) => s + (i.qty || 0) * (i.rate || 0), 0);
+
+        const autoTableOptions = {
+            startY: cursorY + 4,
+            head: [[
+                'Sr No', 'Name of Product / Service', 'HSN/SAC',
+                'UOM', 'Qty', 'Rate', 'Total'
+            ]],
+            body,
+            styles: { fontSize: 9, cellPadding: 2, lineWidth: 0.2 },
+            headStyles: { fillColor: [240, 240, 240], textColor: 0, halign: 'center' },
+            columnStyles: {
+                0: { cellWidth: 10, halign: 'center' },
+                1: { cellWidth: 70 },
+                2: { cellWidth: 18, halign: 'center' },
+                3: { cellWidth: 15, halign: 'center' },
+                4: { cellWidth: 12, halign: 'center' },
+                5: { cellWidth: 20, halign: 'right' },
+                6: { cellWidth: 22, halign: 'right' }
+            },
+            margin: { left: marginX + 1, right: marginX + 1 }
+        };
+
+        if (doc.autoTable) {
+            doc.autoTable(autoTableOptions);
+        } else {
+            // Fallback: simple text rows if autotable is unavailable
+            let y = cursorY + 10;
+            doc.setFontSize(10);
+            body.forEach(row => {
+                doc.text(row.join(' | '), marginX + 3, y);
+                y += 5;
+            });
+        }
+
+        const finalY = (doc.autoTable && doc.lastAutoTable)
+            ? doc.lastAutoTable.finalY || (cursorY + 40)
+            : cursorY + 40;
+
+        // Grand total row
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Grand Total:', marginX + frameWidth - 55, finalY + 8);
+        doc.text(fmt(total), marginX + frameWidth - 5, finalY + 8, { align: 'right' });
+
+        // Amount in words + total band
+        const words = numberToWords(total) || 'Zero';
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Amount in Words: ${words} Only`, marginX + 3, finalY + 18);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Total: ₹ ${fmt(total)}`, marginX + frameWidth - 5, finalY + 18, { align: 'right' });
+
+        // Bank details
+        let bankY = finalY + 30;
+        const bankLines = (inv.bankText || '').split('\n').filter(Boolean);
+        if (bankLines.length) {
+            doc.setTextColor(198, 40, 40);
+            doc.setFontSize(10);
+            bankLines.forEach((line, i) => {
+                doc.text(line, marginX + 3, bankY + i * 5);
+            });
+            doc.setTextColor(0, 0, 0);
+            bankY += bankLines.length * 5 + 4;
+        }
+
+        // Signature area
+        const sigTop = pageHeight - marginY - 28;
+        doc.setFontSize(10);
+        doc.text('For Devi Technical Services', marginX + frameWidth - 3, sigTop, { align: 'right' });
+        doc.line(marginX + frameWidth - 40, sigTop + 14, marginX + frameWidth - 3, sigTop + 14);
+        doc.setFontSize(8);
+        doc.text('(Authorized Signatory)', marginX + frameWidth - 3, sigTop + 20, { align: 'right' });
+
+        doc.save(fileName);
+        showToast('✅ Download Started!');
     });
 }
 
