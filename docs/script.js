@@ -848,10 +848,8 @@ async function generatePDF(inv, PDFLib, fileName) {
     doc.text('KHANPUR, SOUTH DELHI, NEW DELHI - 110062', PW / 2, Y, { align: 'center' });
     Y += 7;
 
-    // Double line below header
-    hLine(Y, 0.6);
-    Y += 1.2;
-    hLine(Y, 0.6);
+    // Single line below header
+    hLine(Y, 0.5);
     Y += 6;
 
     // ── BILL TITLE ───────────────────────────────────────────────
