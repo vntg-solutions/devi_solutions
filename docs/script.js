@@ -364,14 +364,14 @@ if (btnDownload) {
             let cursorY = marginY + 8;
 
             // Header
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(20);
+            doc.setFont('times', 'bold');
+            doc.setFontSize(22);
             doc.setTextColor(198, 40, 40);
             doc.text('DEVI TECHNICAL SERVICES', pageWidth / 2, cursorY, { align: 'center' });
 
             cursorY += 6;
-            doc.setFontSize(9);
-            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.setFont('times', 'normal');
             doc.setTextColor(0, 0, 0);
             doc.text('A-166, Raju Park, Near Devali Village, Khanpur, South Delhi, New Delhi-110062', pageWidth / 2, cursorY, { align: 'center' });
 
@@ -381,7 +381,7 @@ if (btnDownload) {
 
             // Bill title
             cursorY += 8;
-            doc.setFont('helvetica', 'bold');
+            doc.setFont('times', 'bold');
             doc.setFontSize(14);
             doc.text('BILL', marginX + 3, cursorY);
 
@@ -394,19 +394,20 @@ if (btnDownload) {
             const metaRightX = marginX + frameWidth / 2 + 3;
 
             doc.setFontSize(10);
+            doc.setFont('times', 'normal');
             doc.text('Bill No.:', metaLeftX, cursorY);
-            doc.setFont('helvetica', 'bold');
+            doc.setFont('times', 'bold');
             doc.text(inv.invoiceNumber || '-', metaLeftX + 20, cursorY);
 
-            doc.setFont('helvetica', 'normal');
+            doc.setFont('times', 'normal');
             doc.text('Bill Date:', metaLeftX, cursorY + 6);
-            doc.setFont('helvetica', 'bold');
+            doc.setFont('times', 'bold');
             doc.text(formatDate(inv.invoiceDate) || '-', metaLeftX + 20, cursorY + 6);
 
-            doc.setFont('helvetica', 'bold');
+            doc.setFont('times', 'bold');
             doc.text('Details of Receiver | Billed to:', metaRightX, cursorY);
 
-            doc.setFont('helvetica', 'normal');
+            doc.setFont('times', 'normal');
             doc.text('Name:', metaRightX, cursorY + 6);
             doc.text(inv.receiverName || '-', metaRightX + 18, cursorY + 6);
 
@@ -431,6 +432,11 @@ if (btnDownload) {
                 fmt((it.qty || 0) * (it.rate || 0))
             ]));
 
+            // Add filler rows to maintain layout (6 total rows as requested)
+            while (body.length < 6) {
+                body.push(['', '', '', '', '', '', '']);
+            }
+
             const total = inv.items.reduce((s, i) => s + (i.qty || 0) * (i.rate || 0), 0);
 
             const autoTableOptions = {
@@ -440,8 +446,8 @@ if (btnDownload) {
                     'UOM', 'Qty', 'Rate', 'Total'
                 ]],
                 body,
-                styles: { fontSize: 9, cellPadding: 2, lineWidth: 0.2 },
-                headStyles: { fillColor: [240, 240, 240], textColor: 0, halign: 'center' },
+                styles: { font: 'times', fontSize: 10, cellPadding: 2, lineWidth: 0.2, textColor: [0, 0, 0] },
+                headStyles: { fillColor: [243, 244, 246], textColor: 0, halign: 'center', lineWidth: 0.2, fontStyle: 'bold' },
                 columnStyles: {
                     0: { cellWidth: 10, halign: 'center' },
                     1: { cellWidth: 70 },
@@ -451,13 +457,13 @@ if (btnDownload) {
                     5: { cellWidth: 20, halign: 'right' },
                     6: { cellWidth: 22, halign: 'right' }
                 },
-                margin: { left: marginX + 1, right: marginX + 1 }
+                margin: { left: marginX + 1, right: marginX + 1 },
+                theme: 'grid'
             };
 
             if (doc.autoTable) {
                 doc.autoTable(autoTableOptions);
             } else {
-                // Fallback: simple text rows if autotable is unavailable
                 let y = cursorY + 10;
                 doc.setFontSize(10);
                 body.forEach(row => {
@@ -467,23 +473,28 @@ if (btnDownload) {
             }
 
             const finalY = (doc.autoTable && doc.lastAutoTable)
-                ? doc.lastAutoTable.finalY || (cursorY + 40)
-                : cursorY + 40;
+                ? doc.lastAutoTable.finalY
+                : cursorY + 60;
 
-            // Grand total row
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Grand Total:', marginX + frameWidth - 55, finalY + 8);
-            doc.text(fmt(total), marginX + frameWidth - 5, finalY + 8, { align: 'right' });
+            // Grand total row (matches preview logic)
+            doc.setFontSize(10);
+            doc.setFont('times', 'bold');
+            doc.text('Grand Total', marginX + frameWidth - 55, finalY + 6);
+            doc.text(fmt(total), marginX + frameWidth - 5, finalY + 6, { align: 'right' });
+
+            // Separator line for totals
+            doc.setLineWidth(0.3);
+            doc.line(marginX + frameWidth - 60, finalY + 2, marginX + frameWidth, finalY + 2);
+            doc.line(marginX + frameWidth - 60, finalY + 8, marginX + frameWidth, finalY + 8);
 
             // Amount in words + total band
             const words = numberToWords(total) || 'Zero';
             doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Amount in Words: ${words} Only`, marginX + 3, finalY + 18);
+            doc.setFont('times', 'normal');
+            doc.text(`Amount in Words: ${words} Only`, marginX + 3, finalY + 16);
 
-            doc.setFont('helvetica', 'bold');
-            doc.text(`Total: ₹ ${fmt(total)}`, marginX + frameWidth - 5, finalY + 18, { align: 'right' });
+            doc.setFont('times', 'bold');
+            doc.text(`Total: Rs. ${fmt(total)}`, marginX + frameWidth - 5, finalY + 16, { align: 'right' });
 
             // Bank details
             let bankY = finalY + 30;
@@ -491,6 +502,7 @@ if (btnDownload) {
             if (bankLines.length) {
                 doc.setTextColor(198, 40, 40);
                 doc.setFontSize(10);
+                doc.setFont('times', 'bold');
                 bankLines.forEach((line, i) => {
                     doc.text(line, marginX + 3, bankY + i * 5);
                 });
@@ -510,18 +522,20 @@ if (btnDownload) {
             // Signature area
             const sigTop = pageHeight - marginY - 32;
             doc.setFontSize(10);
+            doc.setFont('times', 'bold');
             doc.text('For Devi Technical Services', marginX + frameWidth - 3, sigTop, { align: 'right' });
 
             try {
                 const sigImg = await loadImage('Sign.png');
-                // Center image in the space (roughly 40mm wide space)
                 doc.addImage(sigImg, 'PNG', marginX + frameWidth - 38, sigTop + 2, 35, 12);
             } catch (e) {
-                console.warn('Signature image Sign.png not found or failed to load:', e);
+                console.warn('Signature image Sign.png not found:', e);
             }
 
+            doc.setLineWidth(0.4);
             doc.line(marginX + frameWidth - 40, sigTop + 16, marginX + frameWidth - 3, sigTop + 16);
-            doc.setFontSize(8);
+            doc.setFontSize(9);
+            doc.setFont('times', 'normal');
             doc.text('(Authorized Signatory)', marginX + frameWidth - 3, sigTop + 21, { align: 'right' });
 
             doc.save(fileName);
