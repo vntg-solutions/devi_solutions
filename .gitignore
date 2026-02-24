@@ -1,19 +1,2 @@
-# Maven build output
-target/
-dependency-reduced-pom.xml
-
-# External template copy (source of truth is src/main/resources/templates/)
-templates/
-
-# Generated PDFs (output files, not source)
-*.pdf
-pdfs/
-
-# IDE files
-.idea/
-*.iml
-.vscode/
-
-# OS files
 .DS_Store
 Thumbs.db

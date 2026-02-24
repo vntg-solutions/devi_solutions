@@ -1,30 +1,14 @@
 # GodownOS Invoice Generator
 
-A two-part project for generating PDF invoices.
+> Upload a CSV → Get a PDF. No sign-up. No server. Your data never leaves your browser.
 
-## Web App (for end-users)
-The `web/` folder contains a **static, client-side web app** that non-technical users interact with:
+## Live
+👉 **[Open Invoice Generator](https://sumit-s-upadhyay.github.io/invoice-generator/)**
 
-- User uploads a CSV file with their invoice data
-- Invoice is rendered and previewed instantly in the browser
-- One-click PDF download — no data is stored or sent to any server
-- Deploy to **Netlify** or **GitHub Pages** (no backend needed)
+## How it works
+1. Open the link above
+2. Download the **Sample CSV** and fill it with your invoice details
+3. Drag & drop (or click to upload) your CSV
+4. Click **Download PDF** — invoice saves to your device instantly
 
-� See [`web/README.md`](web/README.md) for deploy instructions.
-
----
-
-## Java CLI Tool (for developers)
-The Maven project in `src/` is the original backend tool used to generate PDFs programmatically:
-
-```powershell
-# Build
-mvn package -q
-
-# Run with a JSON data file
-java -jar target\invoice-generator-1.0-SNAPSHOT.jar --data data\invoice.json --output invoice.pdf
-```
-
-- Template: `templates/invoice.html` (edit without recompiling)
-- Data files: `data/*.json`
-- Tech: Java 17, Thymeleaf, OpenHTMLToPDF
+> 🔒 Everything runs in your browser. No data is uploaded, stored, or logged anywhere.
