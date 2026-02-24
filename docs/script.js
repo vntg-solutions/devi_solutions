@@ -360,18 +360,18 @@ if (btnDownload) {
         wrapper.style.position = 'fixed';
         wrapper.style.left = '0';
         wrapper.style.top = '0';
-        wrapper.style.width = '800px';
+        wrapper.style.width = '100%';
         wrapper.style.zIndex = '999999';
         wrapper.style.opacity = '0';
         wrapper.style.pointerEvents = 'none';
 
         const clone = src.cloneNode(true);
         clone.id = 'invoice-render-pdf';
-        clone.style.width = '800px';
-        clone.style.minWidth = '800px';
-        clone.style.maxWidth = '800px';
-        clone.style.margin = '0';
-        clone.style.border = '1px solid #000';
+        clone.style.width = '650px';
+        clone.style.minWidth = '650px';
+        clone.style.maxWidth = '650px';
+        clone.style.margin = '0 auto';
+        clone.style.border = '2px solid #000';
         clone.style.boxShadow = 'none';
         clone.style.transform = 'none';
         clone.style.transformOrigin = 'top left';

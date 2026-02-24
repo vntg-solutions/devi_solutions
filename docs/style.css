@@ -435,8 +435,8 @@ nav {
    PROFESSIONAL BILL RENDER
    ═══════════════════════════════════════════════════════════ */
 #invoice-render {
-    width: 800px;
-    /* Fixed standardized width for capture */
+    width: 650px;
+    /* Fixed standardized width for capture (narrower than A4 for safe margins) */
     min-height: 1100px;
     margin: 0 auto;
     background: #fff;
@@ -803,9 +803,9 @@ nav {
     }
 
     #invoice-render {
-        width: 800px;
-        min-width: 800px;
-        transform: scale(0.45);
+        width: 650px;
+        min-width: 650px;
+        transform: scale(0.5);
         /* Scale down for mobile preview */
         transform-origin: top left;
         margin-left: 10px;
