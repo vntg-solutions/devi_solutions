@@ -61,8 +61,8 @@ function addItemRow(data) {
     </td>
     <td><input type="text" class="item-hsn" data-id="${id}" value="${esc(data?.hsn || '')}" placeholder="—" /></td>
     <td><input type="text" class="item-uom" data-id="${id}" value="${esc(data?.uom || 'NOS')}" /></td>
-    <td><input type="number" class="item-qty" data-id="${id}" value="${data?.qty || 1}" min="1" class="num" /></td>
-    <td><input type="number" class="item-rate" data-id="${id}" value="${data?.rate || ''}" min="0" step="0.01" class="num" placeholder="0.00" /></td>
+    <td><input type="number" class="item-qty num" data-id="${id}" value="${data?.qty || 1}" min="1" /></td>
+    <td><input type="number" class="item-rate num" data-id="${id}" value="${data?.rate || ''}" min="0" step="0.01" placeholder="0.00" /></td>
     <td class="row-total" data-id="${id}">0.00</td>
     <td><button class="btn-remove" data-id="${id}">✕</button></td>
   `;

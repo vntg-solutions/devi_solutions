@@ -9,8 +9,107 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="style.css">
+    <!-- Inlined styles (static, no server) -->
+    <style>
+/* Devi Technical Services — Bill Generator */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--primary:#C62828;--primary-dk:#8E0000;--primary-lt:#FFF5F5;--bg:#F5F5F4;--surface:#FFFFFF;--border:#D1D5DB;--text:#111827;--muted:#6B7280;--radius:10px;--shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;}
+nav{background:#1e293b;padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.nav-brand{font-size:18px;font-weight:600;color:#fff;letter-spacing:-0.2px;display:flex;align-items:center;gap:12px;}
+.nav-brand i{background:var(--primary);color:#fff;padding:4px 10px;border-radius:6px;font-style:normal;font-weight:700;font-size:13px;}
+.nav-brand span{opacity:.6;font-weight:400;font-size:13px;margin-left:2px;}
+.nav-tabs{display:flex;gap:8px;}
+.nav-tab{padding:8px 16px;font-size:14px;font-weight:600;color:rgba(255,255,255,.8);cursor:pointer;border-radius:6px;transition:all .2s;}
+.nav-tab:hover{background:rgba(255,255,255,0.1);color:#fff;}
+.nav-tab.active{background:#fff;color:var(--primary);}
+.page{max-width:960px;margin:40px auto;padding:0 20px;}
+.section{display:none;}
+.section.active{display:block;animation:fadeIn 0.3s ease-out;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;margin-bottom:24px;box-shadow:var(--shadow);}
+.card-hd{font-size:16px;font-weight:700;color:var(--primary);margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid var(--primary-lt);display:flex;align-items:center;gap:10px;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.fg.full{grid-template-columns:1fr;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.field input,.field select,.field textarea{padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;transition:all .2s;background:#FAFAFA;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);background:#fff;box-shadow:0 0 0 4px var(--primary-lt);}
+.field textarea{resize:vertical;min-height:80px;}
+.items-table{width:100%;border-collapse:separate;border-spacing:0 8px;margin-top:0;}
+.items-table th{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:0 12px 8px;text-align:left;}
+.items-table th.r{text-align:right;}
+.items-table td{padding:0 8px;vertical-align:top;}
+.items-table input,.items-table select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;background:#fff;}
+.items-table .num{text-align:right;}
+.items-table .row-total{text-align:right;font-weight:700;font-size:14px;padding-top:12px;min-width:100px;}
+.btn-remove{background:#FEE2E2;border:none;font-size:18px;color:var(--primary);cursor:pointer;padding:6px 12px;border-radius:8px;margin-top:4px;transition:all 0.2s;}
+.btn-remove:hover{background:var(--primary);color:#fff;}
+.btn-add-row{margin-top:16px;background:#fff;color:var(--primary);border:2px dashed var(--primary);border-radius:8px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer;width:100%;transition:all .2s;}
+.btn-add-row:hover{background:var(--primary-lt);transform:translateY(-1px);}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(198,40,40,0.3);}
+.btn-primary:hover{background:var(--primary-dk);transform:translateY(-2px);box-shadow:0 6px 16px rgba(198,40,40,0.4);}
+.btn-outline{background:#fff;color:var(--primary);border:2px solid var(--primary);}
+.btn-outline:hover{background:var(--primary-lt);transform:translateY(-2px);}
+.btn-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:32px;justify-content:center;}
+.drop-zone{border:3px dashed var(--border);border-radius:16px;padding:60px 40px;text-align:center;cursor:pointer;transition:all .3s;background:#FDFDFD;display:flex;flex-direction:column;align-items:center;gap:16px;}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--primary);background:var(--primary-lt);transform:scale(1.01);}
+.drop-icon-container{width:80px;height:80px;background:var(--primary-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.drop-icon{font-size:40px;}
+.drop-main{font-size:18px;font-weight:700;color:var(--text);}
+.drop-sub{font-size:14px;color:var(--muted);}
+#file-input{display:none;}
+.notice{display:flex;align-items:center;gap:12px;background:var(--primary-lt);border:1px solid #FECACA;border-radius:10px;padding:16px 20px;margin-top:24px;font-size:14px;color:#7F1D1D;font-weight:500;}
+.error-box{display:none;margin-top:16px;padding:12px;background:#FEE2E2;color:#B91C1C;border-radius:8px;font-size:14px;}
+.action-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px;background:#374151;padding:16px 24px;border-radius:12px;color:#fff;}
+.action-info{font-size:14px;}
+.action-info strong{color:#FCA311;}
+.preview-scroll{overflow-x:auto;background:#E5E7EB;padding:40px 20px;border-radius:12px;display:flex;justify-content:center;}
+#invoice-render{width:650px;min-height:1100px;margin:0 auto;background:#fff;font-family:'Times New Roman',serif;font-size:14px;color:#000;border:2px solid #000;padding:16px 18px;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,0.2);position:relative;}
+.bill-header{text-align:center;padding:25px 20px 15px;border-bottom:2px solid #000;}
+.bill-company{font-size:34px;font-weight:900;color:#C62828;text-transform:uppercase;letter-spacing:2.5px;line-height:1.1;margin-bottom:6px;}
+.bill-address{font-size:12px;color:#000;text-transform:uppercase;line-height:1.4;}
+.bill-title{text-align:center;font-size:22px;font-weight:700;padding:10px;border-bottom:2px solid #000;text-transform:uppercase;}
+.bill-meta-receiver{display:grid;grid-template-columns:1fr 1fr;border-bottom:2px solid #000;}
+.bill-section-left{padding:12px 18px;border-right:2px solid #000;}
+.bill-section-right{padding:12px 18px;}
+.bill-meta-row{display:flex;gap:8px;margin-bottom:7px;}
+.bill-label-bold{font-weight:700;min-width:95px;}
+.bill-receiver-title{font-weight:700;text-decoration:underline;margin-bottom:6px;font-size:14px;}
+.bill-items{border-collapse:collapse;width:100%;flex-grow:1;margin-bottom:-1px;}
+.bill-items th{border:1px solid #000;padding:10px 6px;font-size:12px;font-weight:700;text-align:left;background:#f0f0f0;text-transform:uppercase;}
+.bill-items th.th-no,.bill-items th.th-name{text-align:left;}
+.bill-items th.th-total{text-align:right;}
+.bill-items td{border:1px solid #000;padding:8px 6px;font-size:12px;vertical-align:top;line-height:1.3;}
+.bill-items td.no,.bill-items td.name{text-align:left;}
+.bill-items td.c{text-align:center;}
+.bill-items td.r{text-align:right;}
+.bill-grand-row td{border:1px solid #000;border-top:2px solid #000;padding:10px 8px;font-size:14px;font-weight:700;background:#fff;}
+.bill-grand-cell{display:flex;justify-content:space-between;align-items:center;}
+.bill-grand-label{font-weight:700;}
+.bill-grand-amount{min-width:90px;text-align:right;}
+.bill-amount-words{border:1.5px solid #000;border-top:2px solid #000;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;background:#f9f9f9;}
+.bill-amount-words .bill-words-text{flex:1;font-size:13px;}
+.bill-amount-words .bill-total-final{font-size:16px;font-weight:800;text-align:right;}
+.bill-bank-section{border:1.5px solid #000;border-top:2px solid #000;padding:15px;text-align:center;color:#C62828;font-size:14px;font-weight:700;line-height:1.6;}
+.bill-footer{display:flex;border-top:1.5px solid #000;}
+.bill-footer-left{flex:1;padding:20px;font-size:12px;display:flex;align-items:flex-end;color:#666;}
+.bill-footer-right{flex:1;padding:20px;text-align:center;border-left:1.5px solid #000;display:flex;flex-direction:column;align-items:center;justify-content:space-between;}
+.bill-footer-right .for-label{font-size:14px;font-weight:700;margin-bottom:10px;}
+.bill-footer-right .sig-label{font-size:12px;font-weight:700;border-top:1px solid #000;padding-top:5px;width:80%;}
+.bill-footer-right img{max-height:60px;margin-bottom:5px;}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:14px 28px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:9999;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#security-gate{position:fixed;top:0;left:0;width:100%;height:100%;background:#0f172a;z-index:10000;display:flex;align-items:center;justify-content:center;color:#fff;padding:20px;}
+.gate-card{background:#1e293b;padding:30px 20px;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);width:100%;max-width:360px;text-align:center;}
+.gate-card h2{margin-bottom:12px;font-size:24px;}
+.gate-card p{color:#94a3b8;margin-bottom:24px;font-size:14px;}
+.gate-card input{width:100%;padding:12px 16px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;margin-bottom:16px;font-size:16px;}
+.gate-card button{width:100%;padding:12px;border-radius:8px;background:var(--primary);color:#fff;border:none;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.gate-card button:hover{background:var(--primary-dk);}
+@media (max-width:768px){nav{height:auto;padding:15px 20px;flex-direction:column;gap:15px;}.nav-brand{font-size:16px;}.nav-tabs{width:100%;justify-content:center;}.nav-tab{flex:1;text-align:center;padding:10px 5px;font-size:12px;}.page{margin:20px auto;padding:0 10px;}.card{padding:20px 15px;}.fg{grid-template-columns:1fr;gap:15px;}.items-table-wrapper{overflow-x:auto;margin:0 -15px;padding:0 15px;width:calc(100% + 30px);}.items-table{min-width:700px;}.drop-zone{padding:30px 20px;}.drop-icon-container{width:60px;height:60px;}.drop-main{font-size:16px;}.action-bar{padding:15px;flex-direction:column;text-align:center;}.action-bar .btn{width:100%;justify-content:center;}.preview-scroll{padding:20px 0;overflow-x:auto;display:flex;justify-content:flex-start;-webkit-overflow-scrolling:touch;}#invoice-render{width:650px;min-width:650px;transform:scale(0.5);transform-origin:top left;margin-left:10px;}.preview-scroll::after{content:'';display:block;min-width:1px;height:520px;}#gate-pass{font-size:14px;}}
+    </style>
 </head>
 
 <body>
@@ -56,7 +155,7 @@
                 </div>
             </div>
 
-            <!-- Receiver -->
+            <!-- Items  -->
             <div class="card">
                 <div class="card-hd">👤 Receiver / Billed To</div>
                 <div class="fg">
@@ -71,7 +170,7 @@
                 </div>
             </div>
 
-            <!-- Items  -->
+            <!-- Receiver -->
             <div class="card">
                 <div class="card-hd">🛠 Products / Services</div>
                 <div class="items-table-wrapper">
@@ -176,8 +275,42 @@
 
     <div class="toast" id="toast"></div>
 
-    <!-- Custom Logic -->
-    <script src="script.js"></script>
+    <!-- Inlined script (static, no server) -->
+    <script>
+// Devi Technical Services — Bill Generator (inlined)
+const PRODUCTS=[{name:"Canon IR-3225 Photocopier & Network Printer Rent",hsn:"",uom:"NOS",rate:3600},{name:"Printer Cartridge Replacement",hsn:"",uom:"NOS",rate:2500},{name:"Annual Maintenance Contract (AMC)",hsn:"",uom:"NOS",rate:12000},{name:"Network Setup & Configuration",hsn:"",uom:"NOS",rate:5000},{name:"CCTV Camera Installation",hsn:"",uom:"NOS",rate:4500},{name:"Computer Hardware Repair",hsn:"",uom:"HRS",rate:800}];
+const BANKS=[{name:"Jaya Mishra",acNo:"677802010011687",bank:"Union Bank",ifsc:"UBIN0567787"},{name:"Devi Technical Services",acNo:"920020043613270",bank:"Axis Bank",ifsc:"UTIB0001234"}];
+let itemCounter=0,lastInvoice=null;
+document.querySelectorAll('.nav-tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));const tgt=document.getElementById('sec-'+tab.dataset.tab);if(tgt)tgt.classList.add('active');});});
+const bankSelect=document.getElementById('f-bank');if(bankSelect)bankSelect.addEventListener('change',e=>{const cf=document.getElementById('custom-bank-field');if(cf)cf.style.display=e.target.value==='custom'?'flex':'none';});
+function buildProductOptions(){return '<option value="">— Select preset —</option>'+PRODUCTS.map((p,i)=>'<option value="'+i+'">'+p.name+'</option>').join('')+'<option value="custom">✏️ Type manual product...</option>';}
+function isPreset(name){return PRODUCTS.some(p=>p.name===name);}
+function addItemRow(data){itemCounter++;const id=itemCounter;const tbody=document.getElementById('items-body');if(!tbody)return;const tr=document.createElement('tr');tr.dataset.id=id;tr.innerHTML='<td style="text-align:center;font-weight:700;padding-top:14px;">'+id+'</td><td><select class="item-select" data-id="'+id+'">'+buildProductOptions()+'</select><textarea class="item-desc" data-id="'+id+'" placeholder="Type product/service name here..." style="margin-top:8px;display:'+(data&&!isPreset(data.description)?'block':'none')+';width:100%;min-height:50px;padding:6px;border:1px solid var(--border);border-radius:6px;font-size:13px">'+esc(data&&data.description||'')+'</textarea></td><td><input type="text" class="item-hsn" data-id="'+id+'" value="'+esc((data&&data.hsn)||'')+'" placeholder="—"></td><td><input type="text" class="item-uom" data-id="'+id+'" value="'+esc((data&&data.uom)||'NOS')+'"></td><td><input type="number" class="item-qty num" data-id="'+id+'" value="'+(data&&data.qty!==undefined?data.qty:1)+'" min="1"></td><td><input type="number" class="item-rate num" data-id="'+id+'" value="'+(data&&data.rate!==undefined?data.rate:'')+'" min="0" step="0.01" placeholder="0.00"></td><td class="row-total" data-id="'+id+'">0.00</td><td><button type="button" class="btn-remove" data-id="'+id+'">✕</button></td>';tbody.appendChild(tr);const sel=tr.querySelector('.item-select'),desc=tr.querySelector('.item-desc');sel.addEventListener('change',e=>{if(e.target.value==='custom'){desc.style.display='block';desc.value='';desc.focus();}else if(e.target.value===''){desc.style.display='none';desc.value='';}else{const p=PRODUCTS[parseInt(e.target.value)];desc.style.display='none';desc.value=p.name;tr.querySelector('.item-hsn').value=p.hsn;tr.querySelector('.item-uom').value=p.uom;tr.querySelector('.item-rate').value=p.rate;}calcRowTotal(tr);});tr.querySelector('.item-qty').addEventListener('input',()=>calcRowTotal(tr));tr.querySelector('.item-rate').addEventListener('input',()=>calcRowTotal(tr));tr.querySelector('.btn-remove').addEventListener('click',()=>{tr.remove();renumberRows();});if(data)calcRowTotal(tr);}
+function calcRowTotal(tr){const q=parseFloat(tr.querySelector('.item-qty')?.value)||0,r=parseFloat(tr.querySelector('.item-rate')?.value)||0;const tot=tr.querySelector('.row-total');if(tot)tot.textContent=fmt(q*r);}
+function renumberRows(){document.querySelectorAll('#items-body tr').forEach((tr,i)=>{const c=tr.querySelector('td');if(c)c.textContent=i+1;});}
+const btnAddRow=document.getElementById('btn-add-item');if(btnAddRow)btnAddRow.addEventListener('click',()=>addItemRow(null));const itemsBody=document.getElementById('items-body');if(itemsBody&&itemsBody.children.length===0)addItemRow(null);const invDatePicker=document.getElementById('f-invDate');if(invDatePicker)invDatePicker.valueAsDate=new Date();
+const btnPreview=document.getElementById('btn-preview');if(btnPreview)btnPreview.addEventListener('click',()=>{const inv=collectFormData();if(!inv)return;renderInvoice(inv);showSection('preview');document.getElementById('info-number').textContent=inv.invoiceNumber;document.getElementById('info-customer').textContent=inv.receiverName;});
+function collectFormData(){const inv={invoiceNumber:document.getElementById('f-invNo').value.trim(),invoiceDate:document.getElementById('f-invDate').value,receiverName:document.getElementById('f-recvName').value.trim(),receiverAddr:document.getElementById('f-recvAddr').value.trim(),items:[],bankText:''};if(!inv.invoiceNumber){alert('Please enter Bill Number.');return null;}if(!inv.receiverName){alert('Please enter Party Name.');return null;}document.querySelectorAll('#items-body tr').forEach(tr=>{const description=tr.querySelector('.item-desc')?.value.trim();const hsn=(tr.querySelector('.item-hsn')?.value||'').trim();const uom=(tr.querySelector('.item-uom')?.value||'').trim()||'NOS';const qty=parseFloat(tr.querySelector('.item-qty')?.value)||0;const rate=parseFloat(tr.querySelector('.item-rate')?.value)||0;if(description&&qty>0)inv.items.push({description,hsn,uom,qty,rate});});if(inv.items.length===0){alert('Please add at least one item.');return null;}const bankSel=document.getElementById('f-bank').value;if(bankSel==='custom')inv.bankText=document.getElementById('f-bankCustom').value.trim()||'—';else{const b=BANKS[parseInt(bankSel)];inv.bankText='Bank Detail: '+b.name+'\nA/C NO- '+b.acNo+' '+b.bank+' IFSC CODE –\n'+b.ifsc;}return inv;}
+function renderInvoice(inv){lastInvoice=inv;const el=document.getElementById('invoice-render');const total=inv.items.reduce((s,i)=>s+i.qty*i.rate,0);const itemRows=inv.items.map((item,i)=>'<tr><td class="no">'+(i+1)+'.</td><td class="name">'+esc(item.description)+'</td><td class="c">'+esc(item.hsn)+'</td><td class="c">'+esc(item.uom)+'</td><td class="c">'+item.qty+'</td><td class="r">'+fmt(item.rate)+'</td><td class="r">'+fmt(item.qty*item.rate)+'</td></tr>').join('');const emptyRows='<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';const bankLines=(inv.bankText||'').split('\n').map(l=>esc(l)).join('<br>');el.innerHTML='<div class="bill-header"><div class="bill-company">Devi Technical Services</div><div class="bill-address">A-166 RAJU PARK NEAR DEVALI VILLAGE,<br>KHANPUR SOUTH DELHI, NEW DELHI-110062</div></div><div class="bill-title">Bill</div><div class="bill-meta-receiver"><div class="bill-section-left"><div class="bill-meta-row"><span class="bill-label-bold">Bill No.</span> <span>: <strong>'+esc(inv.invoiceNumber)+'</strong></span></div><div class="bill-meta-row"><span class="bill-label-bold">Bill Date</span> <span>: <strong>'+formatDate(inv.invoiceDate)+'</strong></span></div></div><div class="bill-section-right"><div class="bill-receiver-title">Details of Receiver | Billed to:</div><div class="bill-meta-row"><span class="bill-label-bold">Name</span> <span>: '+esc(inv.receiverName)+'</span></div><div class="bill-meta-row"><span class="bill-label-bold">Address</span> <span>: '+esc(inv.receiverAddr).replace(/\n/g,'<br>')+'</span></div></div></div><table class="bill-items"><thead><tr><th class="th-no">NO</th><th class="th-name">NAME OF PRODUCT / SERVICE</th><th>HSN/SAC</th><th>UOM</th><th>QTY</th><th>RATE</th><th class="th-total">TOTAL</th></tr></thead><tbody>'+itemRows+emptyRows+'<tr class="bill-grand-row"><td colspan="7" class="bill-grand-cell"><span class="bill-grand-label">Grand Total</span><span class="bill-grand-amount">'+fmt(total)+'</span></td></tr></tbody></table><div class="bill-amount-words"><span class="bill-words-text">Amount in Words: '+numberToWords(total)+' Only</span><span class="bill-total-final">Total: &#8377; '+fmt(total)+'</span></div><div class="bill-bank-section">'+bankLines+'</div><div class="bill-footer"><div class="bill-footer-left">(Receiver Name and Sign)</div><div class="bill-footer-right"><div class="for-label">For Devi Technical Services</div><img src="Sign.png" alt="Signature"><div class="sig-label">(Authorized Signatory)</div></div></div>';}
+const dropZone=document.getElementById('drop-zone'),fileInput=document.getElementById('file-input');if(dropZone&&fileInput){dropZone.addEventListener('click',()=>fileInput.click());['dragover','dragenter'].forEach(ev=>dropZone.addEventListener(ev,()=>dropZone.classList.add('drag-over')));['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,()=>dropZone.classList.remove('drag-over')));dropZone.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files[0])handleCSV(e.dataTransfer.files[0]);});fileInput.addEventListener('change',e=>{if(e.target.files[0])handleCSV(e.target.files[0]);});}
+function handleCSV(f){hideError();if(!f.name.endsWith('.csv')){showError('Invalid file type.');return;}Papa.parse(f,{skipEmptyLines:true,complete(r){try{const inv=parseCSV(r.data);renderInvoice(inv);showSection('preview');document.getElementById('info-number').textContent=inv.invoiceNumber;document.getElementById('info-customer').textContent=inv.receiverName;}catch(e){showError(e.message);}}});}
+function parseCSV(rows){const inv={invoiceNumber:'',invoiceDate:'',receiverName:'',receiverAddr:'',bankText:'',items:[]};let inItems=false;for(const row of rows){const c0=(row[0]||'').trim();if(!c0)continue;if(c0.toUpperCase()==='ITEMS'){inItems=true;continue;}if(inItems){if(c0.toLowerCase().startsWith('description'))continue;const desc=c0;const qty=parseFloat(row[1])||0;const rate=parseFloat(row[2])||0;const hsn=(row[3]||'').trim();const uom=((row[4]||'').trim())||'NOS';if(desc&&qty)inv.items.push({description:desc,qty,rate,hsn,uom});}else{const k=c0.toLowerCase(),v=(row[1]||'').trim();if(k.includes('number'))inv.invoiceNumber=v;else if(k.includes('date'))inv.invoiceDate=v;else if(k.includes('name'))inv.receiverName=v;else if(k.includes('address'))inv.receiverAddr=v;else if(k.includes('bank'))inv.bankText=v;}}return inv;}
+const btnDownload=document.getElementById('btn-download');if(btnDownload)btnDownload.addEventListener('click',async function(){try{const inv=lastInvoice||collectFormData();if(!inv)return;const PDFLib=(window.jspdf&&window.jspdf.jsPDF)?window.jspdf.jsPDF:(window.jsPDF||null);if(!PDFLib){alert('PDF engine (jsPDF) failed to load. Check your connection.');return;}const safeDate=(inv.invoiceDate||'').replace(/[\/\-]/g,'').slice(0,8)||new Date().toISOString().split('T')[0].replace(/-/g,'');const nameParts=(inv.receiverName||'Client').split(/\s+/).filter(p=>p.length>0).slice(0,2);const safeName=nameParts.length>0?nameParts.join('').replace(/[^a-zA-Z0-9]/g,''):'Client';const fileName=(inv.invoiceNumber?inv.invoiceNumber+'_':'')+safeName+'_Bill_'+safeDate+'.pdf';showToast('Generating PDF...');const doc=new PDFLib({orientation:'p',unit:'mm',format:'a4',putOnlyUsedFonts:true});const pageWidth=doc.internal.pageSize.getWidth(),marginX=12,marginY=12,frameWidth=pageWidth-marginX*2;let y=marginY+8;doc.setFont('times','bold');doc.setFontSize(22);doc.setTextColor(198,40,40);doc.text('DEVI TECHNICAL SERVICES',pageWidth/2,y,{align:'center'});y+=6;doc.setFontSize(10);doc.setFont('times','normal');doc.setTextColor(0,0,0);doc.text('A-166, Raju Park, Near Devali Village, Khanpur, South Delhi, New Delhi-110062',pageWidth/2,y,{align:'center'});y+=8;doc.setLineWidth(0.4);doc.line(marginX,y,marginX+frameWidth,y);y+=8;doc.setFont('times','bold');doc.setFontSize(14);doc.text('BILL',marginX+3,y);y+=6;const metaLeftX=marginX+3,metaRightX=marginX+frameWidth/2+3;doc.setFontSize(10);doc.setFont('times','normal');doc.text('Bill No.:',metaLeftX,y);doc.setFont('times','bold');doc.text(inv.invoiceNumber||'-',metaLeftX+20,y);doc.setFont('times','normal');doc.text('Bill Date:',metaLeftX,y+6);doc.setFont('times','bold');doc.text(formatDate(inv.invoiceDate)||'-',metaLeftX+20,y+6);doc.setFont('times','bold');doc.text('Details of Receiver | Billed to:',metaRightX,y);doc.setFont('times','normal');doc.text('Name:',metaRightX,y+6);doc.text(inv.receiverName||'-',metaRightX+18,y+6);const addressLines=(inv.receiverAddr||'').split('\n');doc.text('Address:',metaRightX,y+12);addressLines.forEach((line,i)=>doc.text(line||'-',metaRightX+18,y+12+i*5));y=y+12+Math.max(1,addressLines.length)*5+4;doc.line(marginX,y,marginX+frameWidth,y);const body=inv.items.map((it,i)=>[(i+1)+'.',it.description||'',it.hsn||'',it.uom||'NOS',String(it.qty||0),fmt(it.rate||0),fmt((it.qty||0)*(it.rate||0))]);body.push(['','','','','','','']);body.push(['','','','','','','']);const total=inv.items.reduce((s,i)=>s+(i.qty||0)*(i.rate||0),0);const col0=10,col1=70,col2=18,col3=15,col4=12,col5=20,col6=22;if(doc.autoTable)doc.autoTable({startY:y+4,head:[['NO','NAME OF PRODUCT / SERVICE','HSN/SAC','UOM','QTY','RATE','TOTAL']],body,styles:{font:'times',fontSize:10,cellPadding:2,lineWidth:0.2,textColor:[0,0,0]},headStyles:{fillColor:[243,244,246],textColor:0,lineWidth:0.2,fontStyle:'bold',halign:'left'},columnStyles:{0:{cellWidth:col0,halign:'left'},1:{cellWidth:col1,halign:'left'},2:{cellWidth:col2,halign:'center'},3:{cellWidth:col3,halign:'center'},4:{cellWidth:col4,halign:'center'},5:{cellWidth:col5,halign:'right'},6:{cellWidth:col6,halign:'right'}},margin:{left:marginX+1,right:marginX+1},theme:'grid'});const finalY=(doc.lastAutoTable&&doc.lastAutoTable.finalY)?doc.lastAutoTable.finalY:y+60;const rightEdge=marginX+frameWidth-10;doc.setLineWidth(0.3);doc.line(marginX,finalY+2,marginX+frameWidth,finalY+2);doc.setFontSize(10);doc.setFont('times','bold');doc.text('Grand Total',marginX+3,finalY+6);doc.text(fmt(total),rightEdge,finalY+6,{align:'right'});doc.line(marginX,finalY+10,marginX+frameWidth,finalY+10);doc.setFont('times','normal');doc.text('Amount in Words: '+(numberToWords(total)||'Zero')+' Only',marginX+3,finalY+16);doc.setFont('times','bold');doc.text('Total: \u20B9 '+fmt(total),rightEdge,finalY+16,{align:'right'});doc.line(marginX,finalY+20,marginX+frameWidth,finalY+20);let bankY=finalY+26;(inv.bankText||'').split('\n').filter(Boolean).forEach((line,i)=>{doc.setTextColor(198,40,40);doc.setFont('times','bold');doc.text(line,pageWidth/2,bankY+i*5,{align:'center'});});doc.setTextColor(0,0,0);const sigSectionTop=bankY+Math.max((inv.bankText||'').split('\n').filter(Boolean).length*5,12)+6,sigSectionHeight=28;doc.setLineWidth(0.3);doc.line(marginX,sigSectionTop,marginX+frameWidth,sigSectionTop);doc.line(marginX+frameWidth/2,sigSectionTop,marginX+frameWidth/2,sigSectionTop+sigSectionHeight);doc.setFontSize(9);doc.setFont('times','normal');doc.text('(Receiver Name and Sign)',marginX+5,sigSectionTop+sigSectionHeight-4);const rightHalfCenterX=marginX+frameWidth*0.75;doc.setFontSize(10);doc.setFont('times','bold');doc.text('For Devi Technical Services',rightHalfCenterX,sigSectionTop+6,{align:'center'});try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src='Sign.png';});doc.addImage(img,'PNG',rightHalfCenterX-17,sigSectionTop+8,34,12);}catch(ignored){}doc.line(rightHalfCenterX-20,sigSectionTop+22,rightHalfCenterX+20,sigSectionTop+22);doc.setFont('times','normal');doc.setFontSize(9);doc.text('(Authorized Signatory)',rightHalfCenterX,sigSectionTop+26,{align:'center'});doc.save(fileName);showToast('Download started.');}catch(err){console.error(err);alert('PDF failed: '+err.message);}});
+document.getElementById('btn-back-edit').addEventListener('click',()=>showSection('form'));
+const AUTH_KEY='DEVI@2026';
+function checkAuth(){const gate=document.getElementById('security-gate');if(!gate)return;if(sessionStorage.getItem('dt_auth')==='true'){gate.style.display='none';document.body.style.overflow='auto';}else{gate.style.display='flex';document.body.style.overflow='hidden';}}
+const gateBtn=document.getElementById('gate-btn');if(gateBtn)gateBtn.addEventListener('click',()=>{const pass=document.getElementById('gate-pass').value;if(pass===AUTH_KEY){sessionStorage.setItem('dt_auth','true');checkAuth();}else{const err=document.getElementById('gate-err');if(err)err.style.display='block';const pi=document.getElementById('gate-pass');if(pi){pi.value='';pi.focus();}}});const gatePassInput=document.getElementById('gate-pass');if(gatePassInput)gatePassInput.addEventListener('keypress',e=>{if(e.key==='Enter')document.getElementById('gate-btn').click();});window.addEventListener('load',checkAuth);
+const btnResetForm=document.getElementById('btn-reset-form');if(btnResetForm)btnResetForm.addEventListener('click',resetForm);const btnNew2=document.getElementById('btn-new2');if(btnNew2)btnNew2.addEventListener('click',()=>{resetForm();showSection('form');});
+function resetForm(){const invNo=document.getElementById('f-invNo'),invDate=document.getElementById('f-invDate'),recvName=document.getElementById('f-recvName'),recvAddr=document.getElementById('f-recvAddr'),itemsBody=document.getElementById('items-body');if(invNo)invNo.value='';if(invDate)invDate.valueAsDate=new Date();if(recvName)recvName.value='';if(recvAddr)recvAddr.value='';if(itemsBody){itemsBody.innerHTML='';addItemRow(null);}}
+function fmt(n){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:2});}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function formatDate(s){if(!s)return '';const d=new Date(s);return isNaN(d)?s:d.toLocaleDateString('en-IN',{day:'numeric',month:'2-digit',year:'numeric'});}
+function showSection(n){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));const sec=document.getElementById('sec-'+n);if(sec)sec.classList.add('active');window.scrollTo(0,0);}
+function showToast(m){const t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}}
+function showError(m){const e=document.getElementById('error-box');if(e){e.style.display='block';const msg=document.getElementById('error-msg');if(msg)msg.textContent=m;}}
+function hideError(){const e=document.getElementById('error-box');if(e)e.style.display='none';}
+function numberToWords(num){const n=Math.floor(num);if(n===0)return 'Zero';const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];function t(n){return n<20?ones[n]:tens[Math.floor(n/10)]+(n%10?' '+ones[n%10]:'');}function h(n){return n>=100?ones[Math.floor(n/100)]+' Hundred'+(n%100?' '+t(n%100):''):t(n);}const c=Math.floor(n/10000000),l=Math.floor((n%10000000)/100000),k=Math.floor((n%100000)/1000),r=n%1000;let res='';if(c)res+=h(c)+' Crore ';if(l)res+=t(l)+' Lakh ';if(k)res+=t(k)+' Thousand ';if(r)res+=h(r);return res.trim();}
+    </script>
 </body>
 
 </html>
