@@ -177,8 +177,8 @@ function renderInvoice(inv) {
 
     const itemRows = inv.items.map((item, idx) => `
     <tr>
-      <td class="c">${idx + 1}.</td>
-      <td>${esc(item.description)}</td>
+      <td class="no">${idx + 1}.</td>
+      <td class="name">${esc(item.description)}</td>
       <td class="c">${esc(item.hsn)}</td>
       <td class="c">${esc(item.uom)}</td>
       <td class="c">${item.qty}</td>
@@ -186,7 +186,7 @@ function renderInvoice(inv) {
       <td class="r">${fmt(item.qty * item.rate)}</td>
     </tr>`).join('');
 
-    const emptyRows = Array(Math.max(0, 6 - inv.items.length)).fill('<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>').join('');
+    const emptyRows = Array(2).fill('<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>').join('');
     const bankLines = (inv.bankText || '').split('\n').map(l => esc(l)).join('<br>');
 
     el.innerHTML = `
@@ -224,28 +224,30 @@ function renderInvoice(inv) {
     <table class="bill-items">
       <thead>
         <tr>
-          <th style="width:6%">Sr No</th>
-          <th style="width:40%">Name of Product / Service</th>
-          <th style="width:10%">HSN/SAC</th>
-          <th style="width:8%">UOM</th>
-          <th style="width:8%">Qty</th>
-          <th style="width:14%">Rate</th>
-          <th style="width:14%">Total</th>
+          <th class="th-no">NO</th>
+          <th class="th-name">NAME OF PRODUCT / SERVICE</th>
+          <th>HSN/SAC</th>
+          <th>UOM</th>
+          <th>QTY</th>
+          <th>RATE</th>
+          <th class="th-total">TOTAL</th>
         </tr>
       </thead>
       <tbody>
         ${itemRows}
         ${emptyRows}
-        <tr class="bill-total-row">
-          <td colspan="6" style="text-align:right; font-weight:800; border-top:2px solid #000;">Grand Total</td>
-          <td style="text-align:right; font-weight:800; border-top:2px solid #000;">${fmt(total)}</td>
+        <tr class="bill-grand-row">
+          <td colspan="7" class="bill-grand-cell">
+            <span class="bill-grand-label">Grand Total</span>
+            <span class="bill-grand-amount">${fmt(total)}</span>
+          </td>
         </tr>
       </tbody>
     </table>
 
     <div class="bill-amount-words">
-      <span><strong>Amount in Words:</strong> ${numberToWords(total)} Only</span>
-      <div class="total-final">Total: &#8377; ${fmt(total)}</div>
+      <span class="bill-words-text">Amount in Words: ${numberToWords(total)} Only</span>
+      <span class="bill-total-final">Total: &#8377; ${fmt(total)}</span>
     </div>
 
     <div class="bill-bank-section">${bankLines}</div>
@@ -421,9 +423,9 @@ if (btnDownload) {
             cursorY = addrYStart + Math.max(1, addressLines.length) * 5 + 4;
             doc.line(marginX, cursorY, marginX + frameWidth, cursorY);
 
-            // Items table via autoTable
+            // Items table via autoTable — match reference: NO, NAME OF PRODUCT/SERVICE, HSN/SAC, UOM, QTY, RATE, TOTAL
             const body = inv.items.map((it, idx) => ([
-                String(idx + 1),
+                (idx + 1) + '.',
                 it.description || '',
                 it.hsn || '',
                 it.uom || 'NOS',
@@ -432,32 +434,35 @@ if (btnDownload) {
                 fmt((it.qty || 0) * (it.rate || 0))
             ]));
 
-            // Add filler rows to maintain layout (6 total rows as requested)
-            while (body.length < 6) {
-                body.push(['', '', '', '', '', '', '']);
-            }
+            // Two empty rows below items (reference layout)
+            body.push(['', '', '', '', '', '', '']);
+            body.push(['', '', '', '', '', '', '']);
 
             const total = inv.items.reduce((s, i) => s + (i.qty || 0) * (i.rate || 0), 0);
+
+            const tableLeft = marginX + 1;
+            const col0 = 10, col1 = 70, col2 = 18, col3 = 15, col4 = 12, col5 = 20, col6 = 22;
+            const totalColStart = tableLeft + col0 + col1 + col2 + col3 + col4 + col5;
 
             const autoTableOptions = {
                 startY: cursorY + 4,
                 head: [[
-                    'Sr No', 'Name of Product / Service', 'HSN/SAC',
-                    'UOM', 'Qty', 'Rate', 'Total'
+                    'NO', 'NAME OF PRODUCT / SERVICE', 'HSN/SAC',
+                    'UOM', 'QTY', 'RATE', 'TOTAL'
                 ]],
                 body,
                 styles: { font: 'times', fontSize: 10, cellPadding: 2, lineWidth: 0.2, textColor: [0, 0, 0] },
-                headStyles: { fillColor: [243, 244, 246], textColor: 0, halign: 'center', lineWidth: 0.2, fontStyle: 'bold' },
+                headStyles: { fillColor: [243, 244, 246], textColor: 0, lineWidth: 0.2, fontStyle: 'bold', halign: 'left' },
                 columnStyles: {
-                    0: { cellWidth: 10, halign: 'center' },
-                    1: { cellWidth: 70 },
-                    2: { cellWidth: 18, halign: 'center' },
-                    3: { cellWidth: 15, halign: 'center' },
-                    4: { cellWidth: 12, halign: 'center' },
-                    5: { cellWidth: 20, halign: 'right' },
-                    6: { cellWidth: 22, halign: 'right' }
+                    0: { cellWidth: col0, halign: 'left' },
+                    1: { cellWidth: col1, halign: 'left' },
+                    2: { cellWidth: col2, halign: 'center' },
+                    3: { cellWidth: col3, halign: 'center' },
+                    4: { cellWidth: col4, halign: 'center' },
+                    5: { cellWidth: col5, halign: 'right' },
+                    6: { cellWidth: col6, halign: 'right' }
                 },
-                margin: { left: marginX + 1, right: marginX + 1 },
+                margin: { left: tableLeft, right: marginX + 1 },
                 theme: 'grid'
             };
 
@@ -476,38 +481,43 @@ if (btnDownload) {
                 ? doc.lastAutoTable.finalY
                 : cursorY + 60;
 
-            // Grand total row (matches preview logic)
+            const rightEdge = marginX + frameWidth - 10;
+            const pageCenterX = pageWidth / 2;
+
+            // Line above Grand Total (reference)
+            doc.setLineWidth(0.3);
+            doc.line(marginX, finalY + 2, marginX + frameWidth, finalY + 2);
+
+            // Grand Total: label aligned to right of RATE area, amount at right edge
             doc.setFontSize(10);
             doc.setFont('times', 'bold');
-            doc.text('Grand Total', marginX + frameWidth - 55, finalY + 6);
-            doc.text(fmt(total), marginX + frameWidth - 5, finalY + 6, { align: 'right' });
+            doc.text('Grand Total', totalColStart, finalY + 6, { align: 'right' });
+            doc.text(fmt(total), rightEdge, finalY + 6, { align: 'right' });
 
-            // Separator line for totals
-            doc.setLineWidth(0.3);
-            doc.line(marginX + frameWidth - 60, finalY + 2, marginX + frameWidth, finalY + 2);
-            doc.line(marginX + frameWidth - 60, finalY + 8, marginX + frameWidth, finalY + 8);
+            // Line below Grand Total
+            doc.line(marginX, finalY + 10, marginX + frameWidth, finalY + 10);
 
-            // Amount in words + total band
+            // Amount in words (left) and Total: ₹ (right)
             const words = numberToWords(total) || 'Zero';
-            doc.setFontSize(10);
             doc.setFont('times', 'normal');
             doc.text(`Amount in Words: ${words} Only`, marginX + 3, finalY + 16);
-
             doc.setFont('times', 'bold');
-            doc.text(`Total: Rs. ${fmt(total)}`, marginX + frameWidth - 5, finalY + 16, { align: 'right' });
+            doc.text('Total: \u20B9 ' + fmt(total), rightEdge, finalY + 16, { align: 'right' });
 
-            // Bank details
-            let bankY = finalY + 30;
+            // Line above bank section
+            doc.line(marginX, finalY + 22, marginX + frameWidth, finalY + 22);
+
+            // Bank details — centered (reference)
+            let bankY = finalY + 28;
             const bankLines = (inv.bankText || '').split('\n').filter(Boolean);
             if (bankLines.length) {
                 doc.setTextColor(198, 40, 40);
                 doc.setFontSize(10);
                 doc.setFont('times', 'bold');
                 bankLines.forEach((line, i) => {
-                    doc.text(line, marginX + 3, bankY + i * 5);
+                    doc.text(line, pageCenterX, bankY + i * 5, { align: 'center' });
                 });
                 doc.setTextColor(0, 0, 0);
-                bankY += bankLines.length * 5 + 4;
             }
 
             // Helper to load image as Base64/Image

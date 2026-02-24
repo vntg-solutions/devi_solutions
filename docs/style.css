@@ -530,10 +530,14 @@ nav {
     padding: 10px 6px;
     font-size: 12px;
     font-weight: 700;
-    text-align: center;
+    text-align: left;
     background: #f0f0f0;
     text-transform: uppercase;
 }
+
+.bill-items th.th-no,
+.bill-items th.th-name { text-align: left; }
+.bill-items th.th-total { text-align: right; }
 
 .bill-items td {
     border: 1px solid #000;
@@ -543,42 +547,55 @@ nav {
     line-height: 1.3;
 }
 
-.bill-items td.c {
-    text-align: center;
-}
+.bill-items td.no { text-align: left; }
+.bill-items td.name { text-align: left; }
+.bill-items td.c { text-align: center; }
+.bill-items td.r { text-align: right; }
 
-.bill-items td.r {
-    text-align: right;
-}
-
-.bill-total-row td {
-    border: 1.5px solid #000;
-    padding: 12px 8px;
-    font-size: 15px;
+.bill-grand-row td {
+    border: 1px solid #000;
+    border-top: 2px solid #000;
+    padding: 10px 8px;
+    font-size: 14px;
     font-weight: 700;
+    background: #fff;
 }
+
+.bill-grand-cell {
+    text-align: right !important;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+.bill-grand-label { font-weight: 700; }
+.bill-grand-amount { min-width: 90px; text-align: right; }
 
 .bill-amount-words {
     border: 1.5px solid #000;
-    padding: 15px 20px;
+    border-top: 2px solid #000;
+    padding: 12px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: #f9f9f9;
 }
 
-.bill-amount-words span {
+.bill-amount-words .bill-words-text {
     flex: 1;
+    font-size: 13px;
 }
 
-.bill-amount-words .total-final {
-    font-size: 18px;
-    font-weight: 900;
+.bill-amount-words .bill-total-final {
+    font-size: 16px;
+    font-weight: 800;
     text-align: right;
 }
 
 .bill-bank-section {
     border: 1.5px solid #000;
+    border-top: 2px solid #000;
     padding: 15px;
     text-align: center;
     color: #C62828;
