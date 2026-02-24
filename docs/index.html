@@ -39,25 +39,41 @@
 
         /* ── Nav ───────────────────────────────────────────────── */
         nav {
-            background: var(--primary);
-            padding: 0 32px;
-            height: 60px;
+            background: #2D3748;
+            /* Solid professional dark grey/blue */
+            padding: 0 40px;
+            height: 64px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .nav-brand {
-            font-size: 18px;
-            font-weight: 800;
+            font-size: 20px;
+            font-weight: 700;
             color: #fff;
             letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-brand i {
+            background: var(--primary);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-style: normal;
+            font-weight: 900;
+            font-size: 14px;
         }
 
         .nav-brand span {
-            opacity: .75;
+            opacity: .7;
             font-weight: 400;
+            font-size: 14px;
+            margin-left: 2px;
         }
 
         .nav-tabs {
@@ -637,7 +653,7 @@
 <body>
 
     <nav>
-        <span class="nav-brand">Devi Technical Services <span>/ Bill Generator</span></span>
+        <span class="nav-brand"><i>DT</i> Devi Technical Services <span>/ Bill Generator</span></span>
         <div class="nav-tabs">
             <div class="nav-tab active" data-tab="form">✏️ Fill Form</div>
             <div class="nav-tab" data-tab="upload">📄 Upload CSV</div>
@@ -949,7 +965,7 @@
       <td class="r">${fmt(item.qty * item.rate)}</td>
     </tr>`).join('');
 
-            const emptyRows = Array(Math.max(0, 10 - inv.items.length)).fill('<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>').join('');
+            const emptyRows = Array(Math.max(0, 6 - inv.items.length)).fill('<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>').join('');
             const bankLines = (inv.bankText || '').split('\n').map(l => esc(l)).join('<br>');
 
             el.innerHTML = `
@@ -1070,8 +1086,35 @@
         /* ── Helpers ────────────────────────────────────────────── */
         document.getElementById('btn-download').addEventListener('click', () => {
             const el = document.getElementById('invoice-render');
-            const num = document.getElementById('info-number').textContent || 'document';
-            html2pdf().set({ margin: 5, filename: `Bill-${num}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } }).from(el).save().then(() => showToast('✅ Bill Downloaded!'));
+            if (!el || !el.innerHTML.trim()) {
+                alert('No bill content found. Please preview first.');
+                return;
+            }
+
+            const customer = (document.getElementById('info-customer').textContent || 'Client').trim();
+            const date = document.getElementById('f-invDate').value || new Date().toISOString().split('T')[0];
+
+            // Filename: First 2 words of client _ Bill _ date
+            const nameParts = customer.split(/\s+/).slice(0, 2);
+            const safeName = nameParts.join('').replace(/[^a-zA-Z0-9]/g, '');
+            const safeDate = date.replace(/[\/\-]/g, '');
+            const fileName = `${safeName}_Bill_${safeDate}.pdf`;
+
+            const opt = {
+                margin: 10,
+                filename: fileName,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            showToast('🔄 Generating PDF...');
+            html2pdf().set(opt).from(el).save().then(() => {
+                showToast('✅ Bill Downloaded!');
+            }).catch(err => {
+                console.error('PDF Error:', err);
+                alert('Download failed. Please try again.');
+            });
         });
 
         document.getElementById('btn-reset-form').addEventListener('click', resetForm);
