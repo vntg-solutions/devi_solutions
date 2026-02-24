@@ -1,2 +1,24 @@
+# Build artifacts
+target/
+*.jar
+*.class
+*.pdf
+
+# Maven
+dependency-reduced-pom.xml
+pom.xml
+
+# Java source (kept locally, not needed for web app)
+src/
+data/
+templates/
+pdfs/
+
+# OS
 .DS_Store
 Thumbs.db
+
+# IDE
+.idea/
+*.iml
+.vscode/
