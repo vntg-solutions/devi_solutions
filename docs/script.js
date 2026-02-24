@@ -16,6 +16,7 @@ const BANKS = [
 
 /* ── State ──────────────────────────────────────────────── */
 let itemCounter = 0;
+let lastInvoice = null;
 
 /* ── Tab switching ──────────────────────────────────────── */
 document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -171,6 +172,7 @@ function collectFormData() {
 
 function renderInvoice(inv) {
     const el = document.getElementById('invoice-render');
+    lastInvoice = inv;
     const total = inv.items.reduce((s, i) => s + i.qty * i.rate, 0);
 
     const itemRows = inv.items.map((item, idx) => `
@@ -288,21 +290,26 @@ function handleCSV(f) {
 }
 
 function parseCSV(rows) {
-    const inv = { invoiceNumber: '', invoiceDate: '', receiverName: '', receiverAddr: '', items: [] };
+    const inv = { invoiceNumber: '', invoiceDate: '', receiverName: '', receiverAddr: '', bankText: '', items: [] };
     let inItems = false;
     for (const row of rows) {
         const c0 = (row[0] || '').trim(); if (!c0) continue;
         if (c0.toUpperCase() === 'ITEMS') { inItems = true; continue; }
         if (inItems) {
             if (c0.toLowerCase().startsWith('description')) continue;
-            const desc = c0, qty = parseFloat(row[1]) || 0, rate = parseFloat(row[2]) || 0;
-            if (desc && qty) inv.items.push({ description: desc, qty, rate, hsn: '', uom: 'NOS' });
+            const desc = c0;
+            const qty = parseFloat(row[1]) || 0;
+            const rate = parseFloat(row[2]) || 0;
+            const hsn = (row[3] || '').trim();
+            const uom = ((row[4] || '').trim()) || 'NOS';
+            if (desc && qty) inv.items.push({ description: desc, qty, rate, hsn, uom });
         } else {
             const k = c0.toLowerCase(), v = (row[1] || '').trim();
             if (k.includes('number')) inv.invoiceNumber = v;
             else if (k.includes('date')) inv.invoiceDate = v;
             else if (k.includes('name')) inv.receiverName = v;
             else if (k.includes('address')) inv.receiverAddr = v;
+            else if (k.includes('bank')) inv.bankText = v;
         }
     }
     return inv;
@@ -312,20 +319,23 @@ function parseCSV(rows) {
 const btnDownload = document.getElementById('btn-download');
 if (btnDownload) {
     btnDownload.addEventListener('click', () => {
-        const el = document.getElementById('invoice-render');
-        if (!el || !el.innerHTML.trim()) {
+        const src = document.getElementById('invoice-render');
+        if (!src || !src.innerHTML.trim()) {
             alert('Please generate the bill first.');
             return;
         }
 
-        const customerName = (document.getElementById('info-customer').textContent || 'Client').trim();
-        const billDateValue = document.getElementById('f-invDate').value || '';
-        const safeDate = billDateValue.replace(/[\/\-]/g, '') || new Date().toISOString().split('T')[0].replace(/-/g, '');
+        const currentInvoice = lastInvoice || {};
 
-        // Filename: First 2 words of client _ Bill _ date
+        const customerName = (currentInvoice.receiverName || document.getElementById('info-customer').textContent || 'Client').trim();
+        const invoiceNumber = (currentInvoice.invoiceNumber || document.getElementById('info-number').textContent || '').trim();
+        const rawDate = (currentInvoice.invoiceDate || document.getElementById('f-invDate').value || new Date().toISOString().split('T')[0]).trim();
+        const safeDate = rawDate.replace(/[\/\-]/g, '') || new Date().toISOString().split('T')[0].replace(/-/g, '');
+
         const nameParts = customerName.split(/\s+/).filter(p => p.length > 0).slice(0, 2);
         const safeName = nameParts.length > 0 ? nameParts.join('').replace(/[^a-zA-Z0-9]/g, '') : 'Client';
-        const fileName = `${safeName}_Bill_${safeDate}.pdf`;
+        const fileNamePrefix = invoiceNumber ? `${invoiceNumber}_` : '';
+        const fileName = `${fileNamePrefix}${safeName}_Bill_${safeDate}.pdf`;
 
         const opt = {
             margin: [10, 5, 10, 5], // T, L, B, R
@@ -343,32 +353,37 @@ if (btnDownload) {
 
         showToast('🔄 Generating PDF...');
 
-        // Hardened capture styles
-        const originalStyle = {
-            width: el.style.width,
-            position: el.style.position,
-            left: el.style.left,
-            top: el.style.top,
-            margin: el.style.margin,
-            border: el.style.border,
-            zIndex: el.style.zIndex
-        };
+        // Use an off-screen clone for stable, device-independent capture
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'fixed';
+        wrapper.style.left = '-9999px';
+        wrapper.style.top = '0';
+        wrapper.style.width = '800px';
+        wrapper.style.zIndex = '999999';
 
-        el.style.width = '800px';
-        el.style.margin = '0';
-        el.style.position = 'fixed';
-        el.style.top = '0';
-        el.style.left = '0';
-        el.style.zIndex = '999999';
-        el.style.border = '1px solid #000'; // Keep border for PDF but ensure no double border
+        const clone = src.cloneNode(true);
+        clone.id = 'invoice-render-pdf';
+        clone.style.width = '800px';
+        clone.style.minWidth = '800px';
+        clone.style.maxWidth = '800px';
+        clone.style.margin = '0';
+        clone.style.border = '1px solid #000';
+        clone.style.boxShadow = 'none';
+        clone.style.transform = 'none';
+        clone.style.transformOrigin = 'top left';
 
-        html2pdf().set(opt).from(el).save().then(() => {
+        wrapper.appendChild(clone);
+        document.body.appendChild(wrapper);
+
+        html2pdf().set(opt).from(clone).save().then(() => {
             showToast('✅ Download Started!');
-            Object.assign(el.style, originalStyle);
         }).catch(err => {
             console.error('PDF Error:', err);
             alert('PDF generation failed.');
-            Object.assign(el.style, originalStyle);
+        }).finally(() => {
+            if (wrapper.parentNode) {
+                wrapper.parentNode.removeChild(wrapper);
+            }
         });
     });
 }
