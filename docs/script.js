@@ -917,20 +917,29 @@ async function generatePDF(inv, PDFLib, fileName) {
     tableBody.push(['', '', '', '', '', '', '']);
     tableBody.push(['', '', '', '', '', '', '']);
 
+    // COL_ALIGN: forced per-column alignment applied to BOTH head and body via didParseCell
+    // This works on all jsPDF-autotable v3.x versions (more reliable than headStyles+columnStyles)
+    const COL_ALIGN = { 0: 'center', 1: 'left', 2: 'center', 3: 'center', 4: 'center', 5: 'right', 6: 'right' };
+
     doc.autoTable({
         startY: Y,
         head: [['NO', 'NAME OF PRODUCT / SERVICE', 'HSN/SAC', 'UOM', 'QTY', 'RATE', 'TOTAL']],
         body: tableBody,
-        styles: { font: FONT, fontSize: 10, cellPadding: 2.5, lineWidth: 0.2, textColor: [0, 0, 0], overflow: 'linebreak' },
+        styles: { font: FONT, fontSize: 10, cellPadding: 3, lineWidth: 0.2, textColor: [0, 0, 0], overflow: 'linebreak' },
         headStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold', lineWidth: 0.3 },
         columnStyles: {
-            0: { cellWidth: 12, halign: 'center' },   // NO — wider so it never wraps
-            1: { cellWidth: 68, halign: 'left' },   // NAME
-            2: { cellWidth: 20, halign: 'center' },   // HSN/SAC — wider to prevent 'HSN/SA\nC'
-            3: { cellWidth: 14, halign: 'center' },   // UOM
-            4: { cellWidth: 12, halign: 'center' },   // QTY
-            5: { cellWidth: 24, halign: 'right' },   // RATE
-            6: { cellWidth: 24, halign: 'right' },   // TOTAL
+            0: { cellWidth: 16 },  // NO  — wide enough, never wraps
+            1: { cellWidth: 62 },  // NAME
+            2: { cellWidth: 22 },  // HSN/SAC — fits on one line
+            3: { cellWidth: 14 },  // UOM
+            4: { cellWidth: 12 },  // QTY
+            5: { cellWidth: 26 },  // RATE
+            6: { cellWidth: 26 },  // TOTAL
+        },
+        didParseCell(data) {
+            // Force halign on every cell — overrides any default left-align
+            const align = COL_ALIGN[data.column.index];
+            if (align) data.cell.styles.halign = align;
         },
         margin: { left: MX, right: MX },
         theme: 'grid',
