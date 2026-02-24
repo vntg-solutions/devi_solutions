@@ -449,13 +449,13 @@ function renderInvoice(inv) {
       <table class="bill-items">
         <thead>
           <tr>
-            <th class="th-no"  style="width:4%">NO</th>
-            <th class="th-name" style="width:42%">NAME OF PRODUCT / SERVICE</th>
-            <th style="width:10%">HSN/SAC</th>
-            <th style="width:8%">UOM</th>
-            <th style="width:6%">QTY</th>
-            <th class="th-r" style="width:14%">RATE</th>
-            <th class="th-r" style="width:16%">TOTAL</th>
+            <th style="width:5%;text-align:center;white-space:nowrap">NO</th>
+            <th style="width:39%;text-align:left">NAME OF PRODUCT / SERVICE</th>
+            <th style="width:11%;text-align:center;white-space:nowrap">HSN/SAC</th>
+            <th style="width:8%;text-align:center;white-space:nowrap">UOM</th>
+            <th style="width:6%;text-align:center;white-space:nowrap">QTY</th>
+            <th style="width:15%;text-align:right;white-space:nowrap">RATE</th>
+            <th style="width:16%;text-align:right;white-space:nowrap">TOTAL</th>
           </tr>
         </thead>
         <tbody>
@@ -921,16 +921,16 @@ async function generatePDF(inv, PDFLib, fileName) {
         startY: Y,
         head: [['NO', 'NAME OF PRODUCT / SERVICE', 'HSN/SAC', 'UOM', 'QTY', 'RATE', 'TOTAL']],
         body: tableBody,
-        styles: { font: FONT, fontSize: 10, cellPadding: 2.2, lineWidth: 0.2, textColor: [0, 0, 0], overflow: 'linebreak' },
-        headStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold', halign: 'left', lineWidth: 0.3 },
+        styles: { font: FONT, fontSize: 10, cellPadding: 2.5, lineWidth: 0.2, textColor: [0, 0, 0], overflow: 'linebreak' },
+        headStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold', lineWidth: 0.3 },
         columnStyles: {
-            0: { cellWidth: 9, halign: 'left' },
-            1: { cellWidth: 72, halign: 'left' },
-            2: { cellWidth: 18, halign: 'center' },
-            3: { cellWidth: 14, halign: 'center' },
-            4: { cellWidth: 12, halign: 'center' },
-            5: { cellWidth: 22, halign: 'right' },
-            6: { cellWidth: 22, halign: 'right' },
+            0: { cellWidth: 12, halign: 'center' },   // NO — wider so it never wraps
+            1: { cellWidth: 68, halign: 'left' },   // NAME
+            2: { cellWidth: 20, halign: 'center' },   // HSN/SAC — wider to prevent 'HSN/SA\nC'
+            3: { cellWidth: 14, halign: 'center' },   // UOM
+            4: { cellWidth: 12, halign: 'center' },   // QTY
+            5: { cellWidth: 24, halign: 'right' },   // RATE
+            6: { cellWidth: 24, halign: 'right' },   // TOTAL
         },
         margin: { left: MX, right: MX },
         theme: 'grid',
