@@ -338,7 +338,8 @@ if (btnDownload) {
         const fileName = `${fileNamePrefix}${safeName}_Bill_${safeDate}.pdf`;
 
         const opt = {
-            margin: [10, 5, 10, 5], // T, L, B, R
+            // Extra margin so the black border has clean white space around it
+            margin: [20, 15, 20, 15], // T, L, B, R (in mm because jsPDF unit is mm)
             filename: fileName,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
@@ -348,7 +349,8 @@ if (btnDownload) {
                 width: 800, // Fixed standardized width for consistent capture
                 windowWidth: 800
             },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['css'], avoid: '#invoice-render-pdf' }
         };
 
         showToast('🔄 Generating PDF...');
@@ -356,10 +358,12 @@ if (btnDownload) {
         // Use an off-screen clone for stable, device-independent capture
         const wrapper = document.createElement('div');
         wrapper.style.position = 'fixed';
-        wrapper.style.left = '-9999px';
+        wrapper.style.left = '0';
         wrapper.style.top = '0';
         wrapper.style.width = '800px';
         wrapper.style.zIndex = '999999';
+        wrapper.style.opacity = '0';
+        wrapper.style.pointerEvents = 'none';
 
         const clone = src.cloneNode(true);
         clone.id = 'invoice-render-pdf';
