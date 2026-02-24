@@ -4,15 +4,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GodownOS — Invoice Generator</title>
-
-    <!-- PapaParse: CSV parsing -->
+    <title>Devi Technical Services — Invoice Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- html2pdf: client-side PDF generation (no server) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <style>
-        /* ── Reset & Base ───────────────────────────────────────────── */
         *,
         *::before,
         *::after {
@@ -22,98 +17,286 @@
         }
 
         :root {
-            --accent: #1A7A6E;
-            --accent-dk: #12594F;
-            --accent-lt: #EAF5F3;
-            --bg: #F0F2F0;
+            --primary: #C62828;
+            --primary-dk: #8E0000;
+            --primary-lt: #FFF5F5;
+            --bg: #F5F5F4;
             --surface: #FFFFFF;
-            --border: #E0E4E2;
-            --text: #1C1C1C;
-            --muted: #6B7280;
-            --danger: #DC2626;
-            --radius: 10px;
+            --border: #DDD;
+            --text: #222;
+            --muted: #777;
+            --radius: 8px;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
         }
 
-        /* ── Top Nav ────────────────────────────────────────────────── */
+        /* ── Nav ───────────────────────────────────────────────── */
         nav {
-            background: var(--accent);
-            padding: 0 32px;
-            height: 56px;
+            background: var(--primary);
+            padding: 0 28px;
+            height: 52px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
         }
 
         .nav-brand {
-            font-size: 17px;
+            font-size: 16px;
             font-weight: 700;
             color: #fff;
-            letter-spacing: -.3px;
         }
 
         .nav-brand span {
-            opacity: .65;
+            opacity: .7;
             font-weight: 400;
         }
 
-        .nav-hint {
-            font-size: 12px;
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+        }
+
+        .nav-tab {
+            padding: 14px 18px;
+            font-size: 13px;
+            font-weight: 600;
             color: rgba(255, 255, 255, .7);
-            background: rgba(255, 255, 255, .12);
-            padding: 4px 12px;
-            border-radius: 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all .15s;
         }
 
-        /* ── Page wrapper ───────────────────────────────────────────── */
+        .nav-tab:hover {
+            color: #fff;
+        }
+
+        .nav-tab.active {
+            color: #fff;
+            border-bottom-color: #fff;
+        }
+
+        /* ── Page ──────────────────────────────────────────────── */
         .page {
-            max-width: 860px;
-            margin: 40px auto;
-            padding: 0 20px;
+            max-width: 900px;
+            margin: 28px auto;
+            padding: 0 18px;
         }
 
-        /* ── Upload Card ────────────────────────────────────────────── */
-        #upload-section {
-            display: block;
-        }
-
-        #result-section {
+        /* ── Sections ──────────────────────────────────────────── */
+        .section {
             display: none;
         }
 
+        .section.active {
+            display: block;
+        }
+
+        /* ── Form card ─────────────────────────────────────────── */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 40px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
+            padding: 28px;
+            margin-bottom: 20px;
         }
 
-        .card-title {
-            font-size: 20px;
+        .card-hd {
+            font-size: 15px;
             font-weight: 700;
-            margin-bottom: 6px;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-lt);
         }
 
-        .card-sub {
-            font-size: 13px;
+        /* ── Form grid ─────────────────────────────────────────── */
+        .fg {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .fg.full {
+            grid-template-columns: 1fr;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field label {
+            font-size: 12px;
+            font-weight: 600;
             color: var(--muted);
-            margin-bottom: 28px;
-            line-height: 1.6;
+            text-transform: uppercase;
+            letter-spacing: .8px;
         }
 
-        /* Drop zone */
+        .field input,
+        .field select,
+        .field textarea {
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color .15s;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .field textarea {
+            resize: vertical;
+            min-height: 56px;
+        }
+
+        /* ── Items table ───────────────────────────────────────── */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .items-table th {
+            background: var(--primary-lt);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px 8px;
+            text-align: left;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .items-table th.r {
+            text-align: right;
+        }
+
+        .items-table td {
+            padding: 6px 4px;
+            vertical-align: middle;
+        }
+
+        .items-table tbody tr {
+            border-bottom: 1px solid #eee;
+        }
+
+        .items-table input,
+        .items-table select {
+            width: 100%;
+            padding: 7px 8px;
+            border: 1.5px solid var(--border);
+            border-radius: 5px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .items-table input:focus,
+        .items-table select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .items-table .num {
+            text-align: right;
+        }
+
+        .items-table .row-total {
+            text-align: right;
+            font-weight: 700;
+            font-size: 13px;
+            padding-right: 8px;
+            min-width: 80px;
+        }
+
+        .btn-remove {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #ccc;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .btn-remove:hover {
+            color: var(--primary);
+        }
+
+        .btn-add-row {
+            margin-top: 10px;
+            background: var(--primary-lt);
+            color: var(--primary);
+            border: 1.5px dashed var(--primary);
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .btn-add-row:hover {
+            background: #FFEBEE;
+        }
+
+        /* ── Buttons ───────────────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 24px;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all .15s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dk);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-lt);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        /* ── Upload section ────────────────────────────────────── */
         .drop-zone {
             border: 2px dashed var(--border);
             border-radius: var(--radius);
-            padding: 52px 32px;
+            padding: 44px 24px;
             text-align: center;
             cursor: pointer;
             transition: all .2s;
@@ -122,20 +305,20 @@
 
         .drop-zone:hover,
         .drop-zone.drag-over {
-            border-color: var(--accent);
-            background: var(--accent-lt);
+            border-color: var(--primary);
+            background: var(--primary-lt);
         }
 
         .drop-icon {
-            font-size: 44px;
+            font-size: 40px;
             display: block;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .drop-main {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .drop-sub {
@@ -147,325 +330,39 @@
             display: none;
         }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 22px;
-            border-radius: 7px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all .18s;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-dk);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--accent);
-            border: 1.5px solid var(--accent);
-        }
-
-        .btn-outline:hover {
-            background: var(--accent-lt);
-        }
-
-        .btn-danger {
-            background: transparent;
-            color: var(--danger);
-            border: 1.5px solid #FECACA;
-        }
-
-        .btn-danger:hover {
-            background: #FEF2F2;
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            margin-top: 24px;
-            flex-wrap: wrap;
-        }
-
-        /* Notice */
         .notice {
             display: flex;
             align-items: flex-start;
             gap: 10px;
-            background: var(--accent-lt);
-            border: 1px solid #B2DFDA;
+            background: var(--primary-lt);
+            border: 1px solid #FFCDD2;
             border-radius: 8px;
-            padding: 14px 16px;
-            margin-top: 24px;
-            font-size: 12.5px;
-            color: #1A4A45;
+            padding: 12px 14px;
+            margin-top: 18px;
+            font-size: 12px;
+            color: #5D0000;
             line-height: 1.6;
         }
 
-        .notice-icon {
-            font-size: 16px;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
-        /* Error */
         .error-box {
             background: #FEF2F2;
             border: 1px solid #FECACA;
             border-radius: 8px;
-            padding: 14px 16px;
+            padding: 12px 14px;
             font-size: 13px;
-            color: var(--danger);
-            margin-top: 20px;
+            color: var(--primary);
+            margin-top: 16px;
             display: none;
         }
 
-        /* ── Invoice Preview ────────────────────────────────────────── */
-        #invoice-preview {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, .08);
-        }
-
-        /* Use a wrapper so preview scrolls on small screens */
-        .preview-scroll {
-            overflow-x: auto;
-        }
-
-        /* ─── The actual invoice (also used for PDF render) ─── */
-        #invoice-render {
-            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            font-size: 13px;
-            color: #1C1C1C;
-            background: #fff;
-            width: 750px;
-            margin: 0 auto;
-        }
-
-        .inv-header {
-            background: #1A7A6E;
-            padding: 28px 36px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .inv-company-name {
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .inv-company-meta {
-            font-size: 11px;
-            color: #C8E8E5;
-            margin-top: 5px;
-            line-height: 1.7;
-        }
-
-        .inv-header-right {
-            text-align: right;
-        }
-
-        .inv-label {
-            font-size: 26px;
-            font-weight: 300;
-            color: #fff;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-
-        .inv-number {
-            font-size: 11px;
-            color: #C8E8E5;
-            margin-top: 6px;
-        }
-
-        .inv-badge {
-            display: inline-block;
-            background: #fff;
-            color: #1A7A6E;
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            padding: 2px 9px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            margin-top: 8px;
-        }
-
-        .inv-meta {
-            display: flex;
-            padding: 22px 36px;
-            border-bottom: 1px solid #E2E2DC;
-        }
-
-        .inv-meta-block {
-            flex: 1;
-        }
-
-        .inv-meta-label {
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #9A9A9A;
-            margin-bottom: 5px;
-        }
-
-        .inv-meta-value {
-            font-size: 13px;
-            font-weight: 700;
-            color: #1C1C1C;
-            line-height: 1.6;
-        }
-
-        .inv-meta-value-sub {
-            font-size: 11px;
-            color: #5A5A5A;
-            line-height: 1.6;
-        }
-
-        .inv-items {
-            padding: 22px 36px;
-        }
-
-        .inv-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .inv-table thead tr {
-            background: #EAF5F3;
-            border-bottom: 2px solid #1A7A6E;
-        }
-
-        .inv-table thead th {
-            padding: 9px 10px;
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #1A7A6E;
-            text-align: left;
-        }
-
-        .inv-table thead th.r {
-            text-align: right;
-        }
-
-        .inv-table tbody tr {
-            border-bottom: 1px solid #E2E2DC;
-        }
-
-        .inv-table tbody tr:last-child {
-            border-bottom: none;
-        }
-
-        .inv-table tbody td {
-            padding: 11px 10px;
-            font-size: 12px;
-            vertical-align: middle;
-        }
-
-        .inv-table tbody td.r {
-            text-align: right;
-            color: #5A5A5A;
-        }
-
-        .inv-table tbody td.b {
-            text-align: right;
-            font-weight: 700;
-            color: #1C1C1C;
-        }
-
-        .inv-totals {
-            padding: 0 36px 24px;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .inv-totals-inner {
-            width: 270px;
-        }
-
-        .inv-totals-inner table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .inv-totals-inner td {
-            padding: 5px 0;
-            font-size: 12px;
-            color: #5A5A5A;
-        }
-
-        .inv-totals-inner td.l {
-            text-align: left;
-        }
-
-        .inv-totals-inner td.r {
-            text-align: right;
-            font-weight: 500;
-        }
-
-        .inv-totals-inner tr.grand td {
-            border-top: 2px solid #1A7A6E;
-            padding-top: 10px;
-            color: #1C1C1C;
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .inv-notes {
-            background: #EAF5F3;
-            border-top: 1px solid #E2E2DC;
-            padding: 18px 36px;
-        }
-
-        .inv-notes-label {
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #1A7A6E;
-            margin-bottom: 5px;
-        }
-
-        .inv-notes-text {
-            font-size: 11px;
-            color: #5A5A5A;
-            line-height: 1.6;
-        }
-
-        .inv-footer {
-            background: #1C1C1C;
-            color: #9A9A9A;
-            padding: 12px 36px;
-            font-size: 10px;
-            text-align: center;
-        }
-
-        /* ── Result action bar ──────────────────────────────────────── */
+        /* ── Preview section ───────────────────────────────────── */
         .action-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 12px;
+            margin-bottom: 16px;
         }
 
         .action-info {
@@ -477,13 +374,17 @@
             color: var(--text);
         }
 
-        /* ── Download flash ─────────────────────────────────────────── */
+        .preview-scroll {
+            overflow-x: auto;
+        }
+
+        /* ── Toast ─────────────────────────────────────────────── */
         .toast {
             position: fixed;
             bottom: 28px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
-            background: #1C1C1C;
+            background: #222;
             color: #fff;
             padding: 12px 24px;
             border-radius: 8px;
@@ -493,378 +394,750 @@
             transition: all .3s;
             pointer-events: none;
             z-index: 9999;
-            white-space: nowrap;
         }
 
         .toast.show {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
+
+        /* ═══════════════════════════════════════════════════════════
+       INVOICE RENDER  (matches the Devi Technical Services bill)
+       ═══════════════════════════════════════════════════════════ */
+        #invoice-render {
+            width: 740px;
+            margin: 0 auto;
+            background: #fff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 13px;
+            color: #000;
+            border: 2px solid #000;
+        }
+
+        .bill-header {
+            text-align: center;
+            padding: 18px 20px 10px;
+            border-bottom: 2px solid #000;
+        }
+
+        .bill-company {
+            font-size: 28px;
+            font-weight: 900;
+            color: #C62828;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.15;
+        }
+
+        .bill-address {
+            font-size: 11px;
+            color: #333;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        .bill-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            padding: 10px;
+            border-bottom: 1px solid #000;
+        }
+
+        .bill-meta {
+            padding: 8px 16px;
+            border-bottom: 1px solid #000;
+        }
+
+        .bill-meta-row {
+            display: flex;
+            gap: 8px;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .bill-meta-label {
+            font-weight: 700;
+            min-width: 110px;
+        }
+
+        .bill-receiver {
+            border-bottom: 1px solid #000;
+            padding: 6px 16px 10px;
+        }
+
+        .bill-receiver-hd {
+            text-align: center;
+            font-weight: 700;
+            font-size: 13px;
+            border-bottom: 1px solid #999;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+        }
+
+        .bill-recv-row {
+            display: flex;
+            gap: 8px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .bill-recv-label {
+            font-weight: 700;
+            min-width: 80px;
+        }
+
+        /* Items */
+        .bill-items {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .bill-items th {
+            border: 1px solid #000;
+            padding: 8px 6px;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            background: #f9f9f9;
+        }
+
+        .bill-items td {
+            border: 1px solid #000;
+            padding: 8px 6px;
+            font-size: 12px;
+            vertical-align: top;
+        }
+
+        .bill-items td.c {
+            text-align: center;
+        }
+
+        .bill-items td.r {
+            text-align: right;
+        }
+
+        .bill-total-row td {
+            border: 1px solid #000;
+            padding: 8px 6px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .bill-amount-words {
+            border: 1px solid #000;
+            border-top: 2px solid #C62828;
+            padding: 8px 12px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bill-amount-words .total-label {
+            font-weight: 700;
+        }
+
+        .bill-bank {
+            border: 1px solid #000;
+            padding: 10px 14px;
+            text-align: center;
+            color: #C62828;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.7;
+        }
+
+        .bill-footer {
+            display: flex;
+            border-top: 1px solid #000;
+        }
+
+        .bill-footer-left {
+            flex: 1;
+            padding: 14px;
+            font-size: 11px;
+            color: #C62828;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .bill-footer-right {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            border-left: 1px solid #000;
+        }
+
+        .bill-footer-right .for-label {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .bill-footer-right .sig-space {
+            height: 45px;
+        }
+
+        .bill-footer-right .sig-label {
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 600px) {
+            .fg {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                display: none;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- ── Nav ── -->
     <nav>
-        <span class="nav-brand">GodownOS <span>/ Invoice Generator</span></span>
-        <span class="nav-hint">🔒 Your data never leaves this browser</span>
+        <span class="nav-brand">Devi Technical Services <span>/ Invoice Generator</span></span>
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-tab="form">✏️ Fill Form</div>
+            <div class="nav-tab" data-tab="upload">📄 Upload CSV</div>
+        </div>
     </nav>
 
     <div class="page">
 
-        <!-- ══════════════ UPLOAD SECTION ══════════════ -->
-        <div id="upload-section">
-            <div class="card">
-                <div class="card-title">Generate Invoice from CSV</div>
-                <div class="card-sub">
-                    Upload your invoice data as a CSV file. The PDF is generated instantly in your browser —
-                    nothing is sent to any server.
-                </div>
+        <!-- ═══ TAB 1: FORM INPUT ═══ -->
+        <div class="section active" id="sec-form">
 
-                <!-- Drop zone -->
+            <!-- Invoice Details -->
+            <div class="card">
+                <div class="card-hd">Invoice Details</div>
+                <div class="fg">
+                    <div class="field">
+                        <label>Invoice Number</label>
+                        <input type="text" id="f-invNo" placeholder="e.g. 131" />
+                    </div>
+                    <div class="field">
+                        <label>Invoice Date</label>
+                        <input type="date" id="f-invDate" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receiver -->
+            <div class="card">
+                <div class="card-hd">Receiver / Billed To</div>
+                <div class="fg">
+                    <div class="field">
+                        <label>Name</label>
+                        <input type="text" id="f-recvName" placeholder="e.g. Pristine Utilities Pvt. Ltd." />
+                    </div>
+                    <div class="field">
+                        <label>Address</label>
+                        <textarea id="f-recvAddr" placeholder="Full address"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items  -->
+            <div class="card">
+                <div class="card-hd">Products / Services</div>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th style="width:5%">#</th>
+                            <th style="width:40%">Product / Service</th>
+                            <th style="width:10%">HSN/SAC</th>
+                            <th style="width:9%">UOM</th>
+                            <th style="width:8%">Qty</th>
+                            <th style="width:12%" class="r">Rate</th>
+                            <th style="width:12%" class="r">Total</th>
+                            <th style="width:4%"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-body"></tbody>
+                </table>
+                <button class="btn-add-row" id="btn-add-item">+ Add Item</button>
+            </div>
+
+            <!-- Bank Details -->
+            <div class="card">
+                <div class="card-hd">Bank Details</div>
+                <div class="fg full">
+                    <div class="field">
+                        <label>Select Bank Account</label>
+                        <select id="f-bank">
+                            <option value="0">Jaya Mishra — A/C 6778020100116​87, Union Bank, IFSC: UBIN0567787</option>
+                            <option value="1">Devi Technical Services — A/C 920020043613270, Axis Bank, IFSC:
+                                UTIB0001234</option>
+                            <option value="2">Custom (type below)</option>
+                        </select>
+                    </div>
+                    <div class="field" id="custom-bank-field" style="display:none;">
+                        <label>Custom Bank Details</label>
+                        <textarea id="f-bankCustom" placeholder="Name, A/C No, Bank, IFSC"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="btn-row">
+                <button class="btn btn-primary" id="btn-preview">👁 Preview Invoice</button>
+                <button class="btn btn-outline" id="btn-reset-form">↩ Clear Form</button>
+            </div>
+        </div>
+
+        <!-- ═══ TAB 2: CSV UPLOAD ═══ -->
+        <div class="section" id="sec-upload">
+            <div class="card">
+                <div class="card-hd">Upload CSV File</div>
                 <div class="drop-zone" id="drop-zone">
                     <span class="drop-icon">📄</span>
                     <div class="drop-main">Drag &amp; drop your CSV file here</div>
                     <div class="drop-sub">or click to browse</div>
                     <input type="file" id="file-input" accept=".csv" />
                 </div>
-
-                <!-- Error -->
                 <div class="error-box" id="error-box">⚠️ <span id="error-msg"></span></div>
-
                 <div class="btn-row">
-                    <a href="sample-invoice.csv" download class="btn btn-outline">
-                        ⬇ Download Sample CSV
-                    </a>
+                    <a href="sample-invoice.csv" download class="btn btn-outline">⬇ Download Sample CSV</a>
                 </div>
-
                 <div class="notice">
-                    <span class="notice-icon">🔒</span>
-                    <span>
-                        <strong>Privacy first.</strong> Your CSV is read locally in your browser.
-                        No data is uploaded, stored, or logged anywhere.
-                        The invoice is cleared from memory as soon as you close this tab.
-                    </span>
+                    <span>🔒</span>
+                    <span><strong>Privacy first.</strong> Your file is processed locally in the browser. Nothing is
+                        uploaded or stored.</span>
                 </div>
             </div>
         </div>
 
-        <!-- ══════════════ RESULT SECTION ══════════════ -->
-        <div id="result-section">
-            <div class="action-bar" style="margin-bottom:16px;">
-                <div class="action-info">
-                    Invoice <strong id="info-number"></strong> ready for <strong id="info-customer"></strong>
-                </div>
+        <!-- ═══ PREVIEW / RESULT ═══ -->
+        <div class="section" id="sec-preview">
+            <div class="action-bar">
+                <div class="action-info">Invoice <strong id="info-number"></strong> ready</div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <button class="btn btn-outline" id="btn-new">↩ New Invoice</button>
+                    <button class="btn btn-outline" id="btn-back-edit">↩ Edit</button>
                     <button class="btn btn-primary" id="btn-download">⬇ Download PDF</button>
                 </div>
             </div>
-
-            <!-- Invoice preview (scrollable on mobile) -->
-            <div id="invoice-preview">
+            <div
+                style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;">
                 <div class="preview-scroll">
-                    <div id="invoice-render"><!-- filled by JS --></div>
+                    <div id="invoice-render"></div>
                 </div>
             </div>
-
             <div class="action-bar">
-                <div class="action-info" style="font-size:12px;">
-                    ⚡ PDF is generated in your browser. After download, all data is cleared.
-                </div>
-                <button class="btn btn-danger" id="btn-clear">🗑 Clear &amp; Start Over</button>
+                <div class="action-info" style="font-size:12px;">⚡ PDF is generated in your browser. Data is cleared
+                    after download.</div>
+                <button class="btn btn-outline" id="btn-new2">🗑 New Invoice</button>
             </div>
         </div>
 
     </div>
 
-    <!-- Toast notification -->
     <div class="toast" id="toast"></div>
 
+    <!-- ═══════════════════════════════════════════════════════════
+     PREDEFINED PRODUCTS / SERVICES CATALOG
+     ═══════════════════════════════════════════════════════════ -->
     <script>
-        /* ──────────────────────────────────────────────────────────────
-           GodownOS Invoice Generator — Browser-Side Logic
-           ────────────────────────────────────────────────────────────── */
+        const PRODUCTS = [
+            { name: "Canon IR-3225 Photocopier & Network Printer Rent", hsn: "", uom: "NOS", rate: 3600 },
+            { name: "Printer Cartridge Replacement", hsn: "", uom: "NOS", rate: 2500 },
+            { name: "Annual Maintenance Contract (AMC)", hsn: "", uom: "NOS", rate: 12000 },
+            { name: "Network Setup & Configuration", hsn: "", uom: "NOS", rate: 5000 },
+            { name: "CCTV Camera Installation", hsn: "", uom: "NOS", rate: 4500 },
+            { name: "Computer Hardware Repair", hsn: "", uom: "HRS", rate: 800 },
+        ];
 
+        const BANKS = [
+            { name: "Jaya Mishra", acNo: "677802010011687", bank: "Union Bank", ifsc: "UBIN0567787" },
+            { name: "Devi Technical Services", acNo: "920020043613270", bank: "Axis Bank", ifsc: "UTIB0001234" },
+        ];
+
+        /* ── State ──────────────────────────────────────────────── */
+        let itemRows = [];
+        let itemCounter = 0;
+
+        /* ── Tab switching ──────────────────────────────────────── */
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById('sec-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        /* ── Bank select toggle ─────────────────────────────────── */
+        document.getElementById('f-bank').addEventListener('change', e => {
+            document.getElementById('custom-bank-field').style.display = e.target.value === '2' ? 'flex' : 'none';
+        });
+
+        /* ── Item rows ──────────────────────────────────────────── */
+        function buildProductOptions() {
+            return '<option value="">— Select or type —</option>' +
+                PRODUCTS.map((p, i) => `<option value="${i}">${p.name}</option>`).join('') +
+                '<option value="custom">✏️ Custom item</option>';
+        }
+
+        function addItemRow(data) {
+            itemCounter++;
+            const id = itemCounter;
+            const tbody = document.getElementById('items-body');
+            const tr = document.createElement('tr');
+            tr.dataset.id = id;
+            tr.innerHTML = `
+    <td style="text-align:center;font-weight:700;padding-top:12px;">${itemCounter}</td>
+    <td>
+      <select class="item-select" data-id="${id}">${buildProductOptions()}</select>
+      <input type="text" class="item-desc" data-id="${id}" placeholder="Item description" style="margin-top:4px;display:${data ? 'block' : 'none'};" value="${esc(data?.description || '')}" />
+    </td>
+    <td><input type="text" class="item-hsn" data-id="${id}" value="${esc(data?.hsn || '')}" placeholder="—" /></td>
+    <td><input type="text" class="item-uom" data-id="${id}" value="${esc(data?.uom || 'NOS')}" /></td>
+    <td><input type="number" class="item-qty" data-id="${id}" value="${data?.qty || 1}" min="1" style="text-align:right;" /></td>
+    <td><input type="number" class="item-rate" data-id="${id}" value="${data?.rate || ''}" min="0" step="0.01" style="text-align:right;" placeholder="0.00" /></td>
+    <td class="row-total" data-id="${id}">0.00</td>
+    <td><button class="btn-remove" data-id="${id}">✕</button></td>
+  `;
+            tbody.appendChild(tr);
+
+            // Product dropdown change
+            tr.querySelector('.item-select').addEventListener('change', e => {
+                const descInput = tr.querySelector('.item-desc');
+                if (e.target.value === 'custom' || e.target.value === '') {
+                    descInput.style.display = 'block';
+                    descInput.value = '';
+                    descInput.focus();
+                    tr.querySelector('.item-hsn').value = '';
+                    tr.querySelector('.item-uom').value = 'NOS';
+                    tr.querySelector('.item-rate').value = '';
+                } else {
+                    const p = PRODUCTS[parseInt(e.target.value)];
+                    descInput.style.display = 'block';
+                    descInput.value = p.name;
+                    tr.querySelector('.item-hsn').value = p.hsn;
+                    tr.querySelector('.item-uom').value = p.uom;
+                    tr.querySelector('.item-rate').value = p.rate;
+                }
+                calcRowTotal(tr);
+            });
+
+            // Auto-calc
+            tr.querySelector('.item-qty').addEventListener('input', () => calcRowTotal(tr));
+            tr.querySelector('.item-rate').addEventListener('input', () => calcRowTotal(tr));
+
+            // Remove
+            tr.querySelector('.btn-remove').addEventListener('click', () => {
+                tr.remove();
+                renumberRows();
+            });
+
+            if (data) calcRowTotal(tr);
+        }
+
+        function calcRowTotal(tr) {
+            const qty = parseFloat(tr.querySelector('.item-qty')?.value) || 0;
+            const rate = parseFloat(tr.querySelector('.item-rate')?.value) || 0;
+            const total = qty * rate;
+            tr.querySelector('.row-total').textContent = fmt(total);
+        }
+
+        function renumberRows() {
+            const rows = document.querySelectorAll('#items-body tr');
+            rows.forEach((tr, i) => { tr.querySelector('td').textContent = i + 1; });
+        }
+
+        document.getElementById('btn-add-item').addEventListener('click', () => addItemRow(null));
+
+        // Start with one empty row
+        addItemRow(null);
+
+        /* ── Set today's date ──────────────────────────────────── */
+        document.getElementById('f-invDate').valueAsDate = new Date();
+
+        /* ── Preview ───────────────────────────────────────────── */
+        document.getElementById('btn-preview').addEventListener('click', () => {
+            const inv = collectFormData();
+            if (!inv) return;
+            renderInvoice(inv);
+            showSection('preview');
+            document.getElementById('info-number').textContent = inv.invoiceNumber;
+        });
+
+        function collectFormData() {
+            const inv = {
+                invoiceNumber: document.getElementById('f-invNo').value.trim(),
+                invoiceDate: document.getElementById('f-invDate').value,
+                receiverName: document.getElementById('f-recvName').value.trim(),
+                receiverAddr: document.getElementById('f-recvAddr').value.trim(),
+                items: [],
+                bank: {}
+            };
+
+            if (!inv.invoiceNumber) { alert('Please enter an Invoice Number.'); return null; }
+            if (!inv.receiverName) { alert('Please enter Receiver Name.'); return null; }
+
+            // Collect items
+            document.querySelectorAll('#items-body tr').forEach(tr => {
+                const desc = tr.querySelector('.item-desc')?.value.trim();
+                const hsn = tr.querySelector('.item-hsn')?.value.trim() || '';
+                const uom = tr.querySelector('.item-uom')?.value.trim() || 'NOS';
+                const qty = parseFloat(tr.querySelector('.item-qty')?.value) || 0;
+                const rate = parseFloat(tr.querySelector('.item-rate')?.value) || 0;
+                if (desc && qty > 0 && rate > 0) {
+                    inv.items.push({ description: desc, hsn, uom, qty, rate });
+                }
+            });
+
+            if (inv.items.length === 0) { alert('Please add at least one item.'); return null; }
+
+            // Bank
+            const bankSel = document.getElementById('f-bank').value;
+            if (bankSel === '2') {
+                inv.bankText = document.getElementById('f-bankCustom').value.trim() || '—';
+            } else {
+                const b = BANKS[parseInt(bankSel)];
+                inv.bankText = `Bank Detail: ${b.name}\nA/C NO- ${b.acNo} ${b.bank} IFSC CODE –\n${b.ifsc}`;
+            }
+
+            return inv;
+        }
+
+        /* ── RENDER INVOICE (matches sample bill design) ────────── */
+        function renderInvoice(inv) {
+            const el = document.getElementById('invoice-render');
+            const total = inv.items.reduce((s, i) => s + i.qty * i.rate, 0);
+
+            const itemRows = inv.items.map((item, idx) => `
+    <tr>
+      <td class="c">${idx + 1}.</td>
+      <td>${esc(item.description)}</td>
+      <td class="c">${esc(item.hsn) || ''}</td>
+      <td class="c">${esc(item.uom)}</td>
+      <td class="c">${item.qty}</td>
+      <td class="r">${fmt(item.rate)}</td>
+      <td class="r">${fmt(item.qty * item.rate)}</td>
+    </tr>`).join('');
+
+            // Add empty rows for classic look
+            const emptyCount = Math.max(0, 5 - inv.items.length);
+            const emptyRows = Array(emptyCount).fill('<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>').join('');
+
+            const dateStr = inv.invoiceDate ? formatDate(inv.invoiceDate) : '—';
+            const bankLines = (inv.bankText || '').split('\n').map(l => esc(l)).join('<br>');
+
+            el.innerHTML = `
+    <div class="bill-header">
+      <div class="bill-company">Devi Technical<br>Services</div>
+      <div class="bill-address">A-166 Raju Park Near Devali Village,<br>Khanpur South Delhi, New Delhi-110062</div>
+    </div>
+
+    <div class="bill-title">Invoice</div>
+
+    <div class="bill-meta">
+      <div class="bill-meta-row"><span class="bill-meta-label">Invoice No.</span><span>: ${esc(inv.invoiceNumber)}</span></div>
+      <div class="bill-meta-row"><span class="bill-meta-label">Invoice Date</span><span>: ${dateStr}</span></div>
+    </div>
+
+    <div class="bill-receiver">
+      <div class="bill-receiver-hd">Details of Receiver | Billed to:</div>
+      <div class="bill-recv-row"><span class="bill-recv-label">Name :</span><span>${esc(inv.receiverName)}</span></div>
+      <div class="bill-recv-row"><span class="bill-recv-label">Address :</span><span>${esc(inv.receiverAddr).replace(/\n/g, '<br>')}</span></div>
+    </div>
+
+    <table class="bill-items">
+      <thead>
+        <tr>
+          <th style="width:6%">Sr.<br>No</th>
+          <th style="width:40%">Name of Product / Service</th>
+          <th style="width:10%">HSN/<br>SAC</th>
+          <th style="width:8%">UOM</th>
+          <th style="width:8%">Qty</th>
+          <th style="width:14%">Rate</th>
+          <th style="width:14%">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemRows}
+        ${emptyRows}
+      </tbody>
+      <tfoot>
+        <tr class="bill-total-row">
+          <td colspan="6" style="text-align:right;"><strong>Total</strong></td>
+          <td style="text-align:right;"><strong>${fmt(total)}</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="bill-amount-words">
+      <span><strong>Amount in Words:</strong> ${numberToWords(total)} Only</span>
+      <span class="total-label">Total Amount&nbsp;&nbsp;&nbsp;&nbsp;<strong>${fmt(total)}</strong></span>
+    </div>
+
+    <div class="bill-bank">${bankLines}</div>
+
+    <div class="bill-footer">
+      <div class="bill-footer-left">(receiver Name and Sign)</div>
+      <div class="bill-footer-right">
+        <div class="for-label">For Devi Technical Services</div>
+        <div class="sig-space"></div>
+        <div class="sig-label">(Authorized Signatory)</div>
+      </div>
+    </div>
+  `;
+        }
+
+        /* ── CSV Upload (secondary) ────────────────────────────── */
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
-        const uploadSec = document.getElementById('upload-section');
-        const resultSec = document.getElementById('result-section');
-        const errorBox = document.getElementById('error-box');
-        const errorMsg = document.getElementById('error-msg');
-        const invoiceEl = document.getElementById('invoice-render');
-
-        // ── Drag & drop ───────────────────────────────────────────────
         dropZone.addEventListener('click', () => fileInput.click());
         dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
         dropZone.addEventListener('drop', e => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            const file = e.dataTransfer.files[0];
-            if (file) handleFile(file);
+            e.preventDefault(); dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files[0]) handleCSV(e.dataTransfer.files[0]);
         });
-        fileInput.addEventListener('change', e => {
-            if (e.target.files[0]) handleFile(e.target.files[0]);
-        });
+        fileInput.addEventListener('change', e => { if (e.target.files[0]) handleCSV(e.target.files[0]); });
 
-        // ── Buttons ───────────────────────────────────────────────────
-        document.getElementById('btn-download').addEventListener('click', downloadPDF);
-        document.getElementById('btn-new').addEventListener('click', resetApp);
-        document.getElementById('btn-clear').addEventListener('click', resetApp);
-
-        // ── File handler ──────────────────────────────────────────────
-        function handleFile(file) {
+        function handleCSV(file) {
             hideError();
-            if (!file.name.endsWith('.csv')) {
-                showError('Please upload a .csv file.');
-                return;
-            }
-
+            if (!file.name.endsWith('.csv')) { showError('Please upload a .csv file.'); return; }
             Papa.parse(file, {
                 skipEmptyLines: true,
-                complete(results) {
+                complete(r) {
                     try {
-                        const invoice = parseCSV(results.data);
-                        renderInvoice(invoice);
-                        showResult(invoice);
-                    } catch (err) {
-                        showError(err.message);
-                    }
+                        const inv = parseCSV(r.data);
+                        renderInvoice(inv);
+                        showSection('preview');
+                        document.getElementById('info-number').textContent = inv.invoiceNumber;
+                    } catch (err) { showError(err.message); }
                 },
                 error(err) { showError('Could not read CSV: ' + err.message); }
             });
         }
 
         function parseCSV(rows) {
-            const inv = {
-                invoiceNumber: '', invoiceDate: '', dueDate: '',
-                companyName: '', companyAddress: '', companyEmail: '',
-                customerName: '', customerEmail: '', customerAddress: '',
-                notes: '', items: []
-            };
-
+            const inv = { invoiceNumber: '', invoiceDate: '', receiverName: '', receiverAddr: '', bankText: '', items: [] };
             const keyMap = {
-                'invoice number': 'invoiceNumber',
-                'invoice date': 'invoiceDate',
-                'due date': 'dueDate',
-                'company name': 'companyName',
-                'company address': 'companyAddress',
-                'company email': 'companyEmail',
-                'customer name': 'customerName',
-                'customer email': 'customerEmail',
-                'customer address': 'customerAddress',
-                'notes': 'notes'
+                'invoice number': 'invoiceNumber', 'invoice date': 'invoiceDate',
+                'receiver name': 'receiverName', 'customer name': 'receiverName',
+                'receiver address': 'receiverAddr', 'customer address': 'receiverAddr',
+                'bank details': 'bankText', 'notes': 'bankText'
             };
-
-            let inItems = false;
-            let itemHeaderSeen = false;
-
+            let inItems = false, headerSeen = false;
             for (const row of rows) {
-                const col0 = (row[0] || '').trim();
-                if (!col0) continue;
-
-                // Detect items section marker
-                if (col0.toUpperCase() === 'ITEMS' || col0.toUpperCase() === '--- ITEMS ---') {
-                    inItems = true;
-                    continue;
-                }
-
+                const c0 = (row[0] || '').trim();
+                if (!c0) continue;
+                if (c0.toUpperCase() === 'ITEMS') { inItems = true; continue; }
                 if (inItems) {
-                    // Skip the "Description, Quantity, Unit Price" header row
-                    if (!itemHeaderSeen && col0.toLowerCase().startsWith('description')) {
-                        itemHeaderSeen = true;
-                        continue;
-                    }
-                    const description = col0;
-                    const quantity = parseFloat((row[1] || '').trim()) || 0;
-                    const unitPrice = parseFloat((row[2] || '').trim().replace(/,/g, '')) || 0;
-                    if (description && quantity && unitPrice) {
-                        inv.items.push({ description, quantity, unitPrice });
-                    }
+                    if (!headerSeen && c0.toLowerCase().startsWith('description')) { headerSeen = true; continue; }
+                    const desc = c0, qty = parseFloat((row[1] || '').trim()) || 0;
+                    const rate = parseFloat((row[2] || '').trim().replace(/,/g, '')) || 0;
+                    const hsn = (row[3] || '').trim(), uom = (row[4] || '').trim() || 'NOS';
+                    if (desc && qty && rate) inv.items.push({ description: desc, hsn, uom, qty, rate });
                 } else {
-                    const key = col0.toLowerCase();
-                    const value = (row[1] || '').trim();
-                    if (keyMap[key]) inv[keyMap[key]] = value;
+                    const key = c0.toLowerCase(), val = (row[1] || '').trim();
+                    if (keyMap[key]) inv[keyMap[key]] = val;
                 }
             }
-
-            // Validate required fields
-            if (!inv.invoiceNumber) throw new Error('Missing "Invoice Number" in your CSV.');
-            if (!inv.customerName) throw new Error('Missing "Customer Name" in your CSV.');
-            if (inv.items.length === 0) throw new Error('No items found. Add an ITEMS section to your CSV.');
-
+            if (!inv.invoiceNumber) throw new Error('Missing "Invoice Number".');
+            if (!inv.receiverName) throw new Error('Missing "Receiver Name".');
+            if (!inv.items.length) throw new Error('No items found. Add ITEMS section.');
+            if (!inv.bankText) inv.bankText = BANKS[0].name + '\nA/C NO- ' + BANKS[0].acNo + ' ' + BANKS[0].bank + ' IFSC CODE –\n' + BANKS[0].ifsc;
             return inv;
         }
 
-        // ── Maths ─────────────────────────────────────────────────────
-        function fmt(n) {
-            return Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-        function subtotal(items) { return items.reduce((s, i) => s + i.quantity * i.unitPrice, 0); }
-        function tax(items) { return subtotal(items) * 0.18; }
-        function grand(items) { return subtotal(items) + tax(items); }
-
-        // ── Render invoice HTML ───────────────────────────────────────
-        function renderInvoice(inv) {
-            const itemRows = inv.items.map((item, idx) => `
-    <tr>
-      <td>${idx + 1}</td>
-      <td>${esc(item.description)}</td>
-      <td class="r">${item.quantity}</td>
-      <td class="r">&#8377; ${fmt(item.unitPrice)}</td>
-      <td class="b">&#8377; ${fmt(item.quantity * item.unitPrice)}</td>
-    </tr>`).join('');
-
-            const notesHtml = inv.notes ? `
-    <div class="inv-notes">
-      <div class="inv-notes-label">Notes</div>
-      <div class="inv-notes-text">${esc(inv.notes)}</div>
-    </div>` : '';
-
-            invoiceEl.innerHTML = `
-    <div class="inv-header">
-      <div>
-        <div class="inv-company-name">${esc(inv.companyName || 'Your Company')}</div>
-        <div class="inv-company-meta">
-          ${esc(inv.companyAddress || '')}<br>
-          ${esc(inv.companyEmail || '')}
-        </div>
-      </div>
-      <div class="inv-header-right">
-        <div class="inv-label">Invoice</div>
-        <div class="inv-number"># ${esc(inv.invoiceNumber)}</div>
-        <div><span class="inv-badge">Due</span></div>
-      </div>
-    </div>
-
-    <div class="inv-meta">
-      <div class="inv-meta-block" style="flex:2;">
-        <div class="inv-meta-label">Bill To</div>
-        <div class="inv-meta-value">${esc(inv.customerName)}</div>
-        <div class="inv-meta-value-sub">${esc(inv.customerEmail)}</div>
-        <div class="inv-meta-value-sub">${esc(inv.customerAddress)}</div>
-      </div>
-      <div class="inv-meta-block">
-        <div class="inv-meta-label">Invoice Date</div>
-        <div class="inv-meta-value">${fmtDate(inv.invoiceDate)}</div>
-      </div>
-      <div class="inv-meta-block">
-        <div class="inv-meta-label">Due Date</div>
-        <div class="inv-meta-value">${fmtDate(inv.dueDate)}</div>
-      </div>
-    </div>
-
-    <div class="inv-items">
-      <table class="inv-table">
-        <thead>
-          <tr>
-            <th style="width:5%">#</th>
-            <th style="width:50%">Description</th>
-            <th class="r" style="width:10%">Qty</th>
-            <th class="r" style="width:17%">Unit Price</th>
-            <th class="r" style="width:18%">Total</th>
-          </tr>
-        </thead>
-        <tbody>${itemRows}</tbody>
-      </table>
-    </div>
-
-    <div class="inv-totals">
-      <div class="inv-totals-inner">
-        <table>
-          <tr>
-            <td class="l">Subtotal</td>
-            <td class="r">&#8377; ${fmt(subtotal(inv.items))}</td>
-          </tr>
-          <tr>
-            <td class="l">GST (18%)</td>
-            <td class="r">&#8377; ${fmt(tax(inv.items))}</td>
-          </tr>
-          <tr class="grand">
-            <td class="l">Grand Total</td>
-            <td class="r">&#8377; ${fmt(grand(inv.items))}</td>
-          </tr>
-        </table>
-      </div>
-    </div>
-
-    ${notesHtml}
-
-    <div class="inv-footer">
-      Generated by GodownOS Invoice Generator &nbsp;|&nbsp;
-      This is a computer-generated document — no signature required.
-    </div>
-  `;
-        }
-
-        // ── Download PDF (then auto-clear) ────────────────────────────
+        /* ── PDF download ──────────────────────────────────────── */
+        document.getElementById('btn-download').addEventListener('click', downloadPDF);
         function downloadPDF() {
-            const el = invoiceEl;
-            const number = document.getElementById('info-number').textContent || 'invoice';
-            const filename = `GodownOS-${number}.pdf`;
-
-            const opt = {
-                margin: [8, 8, 8, 8],
-                filename,
+            const el = document.getElementById('invoice-render');
+            const num = document.getElementById('info-number').textContent || 'invoice';
+            html2pdf().set({
+                margin: [6, 6, 6, 6],
+                filename: `Invoice-${num}.pdf`,
                 image: { type: 'jpeg', quality: 0.97 },
                 html2canvas: { scale: 2, useCORS: true, logging: false },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(el).save().then(() => {
+            }).from(el).save().then(() => {
                 showToast('✅ Invoice downloaded!');
-                // Clear data 2 s after download
-                setTimeout(resetApp, 2000);
+                setTimeout(resetAll, 2000);
             });
         }
 
-        // ── Helpers ───────────────────────────────────────────────────
-        function showResult(inv) {
-            document.getElementById('info-number').textContent = inv.invoiceNumber;
-            document.getElementById('info-customer').textContent = inv.customerName;
-            uploadSec.style.display = 'none';
-            resultSec.style.display = 'block';
+        /* ── Nav / section helpers ─────────────────────────────── */
+        function showSection(name) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec-' + name).classList.add('active');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             window.scrollTo(0, 0);
         }
 
-        function resetApp() {
-            // Wipe all data
-            invoiceEl.innerHTML = '';
-            fileInput.value = '';
-            document.getElementById('info-number').textContent = '';
-            document.getElementById('info-customer').textContent = '';
-            uploadSec.style.display = 'block';
-            resultSec.style.display = 'none';
-            hideError();
-            window.scrollTo(0, 0);
+        document.getElementById('btn-back-edit').addEventListener('click', () => {
+            showSection('form');
+            document.querySelector('[data-tab="form"]').classList.add('active');
+        });
+        document.getElementById('btn-new2').addEventListener('click', resetAll);
+        document.getElementById('btn-reset-form').addEventListener('click', resetForm);
+
+        function resetAll() {
+            document.getElementById('invoice-render').innerHTML = '';
+            resetForm();
+            showSection('form');
+            document.querySelector('[data-tab="form"]').classList.add('active');
         }
 
-        function showError(msg) {
-            errorMsg.textContent = msg;
-            errorBox.style.display = 'block';
-        }
-        function hideError() { errorBox.style.display = 'none'; }
-
-        function esc(str) {
-            return String(str || '')
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
-
-        function fmtDate(str) {
-            if (!str) return '—';
-            const d = new Date(str);
-            if (isNaN(d)) return str;
-            return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        function resetForm() {
+            document.getElementById('f-invNo').value = '';
+            document.getElementById('f-invDate').valueAsDate = new Date();
+            document.getElementById('f-recvName').value = '';
+            document.getElementById('f-recvAddr').value = '';
+            document.getElementById('f-bank').value = '0';
+            document.getElementById('custom-bank-field').style.display = 'none';
+            document.getElementById('items-body').innerHTML = '';
+            itemCounter = 0;
+            addItemRow(null);
         }
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+        /* ── Utilities ─────────────────────────────────────────── */
+        function fmt(n) { return Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        function formatDate(s) {
+            if (!s) return '—';
+            const d = new Date(s);
+            return isNaN(d) ? s : d.toLocaleDateString('en-IN', { day: 'numeric', month: '2-digit', year: 'numeric' });
+        }
+        function showError(m) { document.getElementById('error-msg').textContent = m; document.getElementById('error-box').style.display = 'block'; }
+        function hideError() { document.getElementById('error-box').style.display = 'none'; }
+        function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+
+        /* ── Number to words (Indian system) ───────────────────── */
+        function numberToWords(num) {
+            if (num === 0) return 'Zero';
+            const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+                'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+            function twoDigits(n) {
+                if (n < 20) return ones[n];
+                return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
+            }
+            function threeDigits(n) {
+                if (n >= 100) return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + twoDigits(n % 100) : '');
+                return twoDigits(n);
+            }
+
+            const n = Math.floor(num);
+            let result = '';
+            const crore = Math.floor(n / 10000000);
+            const lakh = Math.floor((n % 10000000) / 100000);
+            const thou = Math.floor((n % 100000) / 1000);
+            const rem = n % 1000;
+
+            if (crore) result += threeDigits(crore) + ' Crore ';
+            if (lakh) result += twoDigits(lakh) + ' Lakh ';
+            if (thou) result += twoDigits(thou) + ' Thousand ';
+            if (rem) result += threeDigits(rem);
+
+            return result.trim() || 'Zero';
         }
     </script>
 </body>

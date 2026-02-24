@@ -1,17 +1,9 @@
-Field,Value,
-Invoice Number,INV-2026-003,
-Invoice Date,11-12-1998,
-Due Date,10-03-2026,
-Company Name,GodownOS Technologies,
-Company Address,"12B Industrial Estate, Andheri East, Mumbai - 400093",
-Company Email,billing@godownos.io,
-Customer Name,Rajesh Warehouse Solutions Pvt. Ltd.,
-Customer Email,accounts@rajeshwh.com,
-Customer Address,"Plot 47, MIDC Bhosari, Pune - 411026",
-Notes,Payment due within 15 days. Transfer to HDFC Bank A/C 012345678912 IFSC HDFC0001234.,
-ITEMS,,
-Description,Quantity,Unit Price
-Pallet Storage - Zone A (per pallet/month),20,850
-Cold-Chain Storage - Zone C (per sqft/month),5,1200
-Inward Handling and Labelling Service,3,2500
-GodownOS SaaS Licence - Business Plan,1,4999
+Field,Value
+Invoice Number,131
+Invoice Date,2/02/2026
+Receiver Name,PRISTINE UTILITIES PVT.LTD
+Receiver Address,"B-2A/31 JANAKPURI NEW DELHI, SOUTH WEST DELHI, DELHI DEH 110058"
+Bank Details,"Bank Detail: JAYA MISHRA, A/C NO- 677802010011687 UNION BANK IFSC CODE – UBIN0567787"
+ITEMS
+Description,Quantity,Unit Price,HSN/SAC,UOM
+Canon IR-3225 Photocopier & Network Printer Rent for the month of December to February 2026,3,3600,,NOS
