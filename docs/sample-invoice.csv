@@ -1,9 +1,11 @@
 Field,Value
 Invoice Number,131
-Invoice Date,2/02/2026
-Receiver Name,PRISTINE UTILITIES PVT.LTD
-Receiver Address,"B-2A/31 JANAKPURI NEW DELHI, SOUTH WEST DELHI, DELHI DEH 110058"
-Bank Details,"Bank Detail: JAYA MISHRA, A/C NO- 677802010011687 UNION BANK IFSC CODE – UBIN0567787"
+Invoice Date,2026-02-24
+Receiver Name,Pristine Utilities Pvt. Ltd.
+Receiver Address,"B-2A/31, Janakpuri, New Delhi - 110058"
+Bank Details,"Bank Detail: Jaya Mishra | A/C NO- 677802010011687 | Union Bank | IFSC CODE - UBIN0567787"
 ITEMS
 Description,Quantity,Unit Price,HSN/SAC,UOM
-Canon IR-3225 Photocopier & Network Printer Rent for the month of December to February 2026,3,3600,,NOS
+Canon IR-3225 Photocopier & Network Printer Rent (Dec–Feb 2026),3,3600,,NOS
+Printer Cartridge Replacement,1,2500,,NOS
+Network Setup & Configuration,1,5000,,NOS
