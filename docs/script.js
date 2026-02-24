@@ -49,7 +49,7 @@ function addItemRow(data) {
     const id = itemCounter;
     const tbody = document.getElementById('items-body');
     if (!tbody) return;
-    
+
     const tr = document.createElement('tr');
     tr.dataset.id = id;
     tr.innerHTML = `
@@ -106,9 +106,9 @@ function calcRowTotal(tr) {
 
 function renumberRows() {
     const rows = document.querySelectorAll('#items-body tr');
-    rows.forEach((tr, i) => { 
+    rows.forEach((tr, i) => {
         const cell = tr.querySelector('td');
-        if (cell) cell.textContent = i + 1; 
+        if (cell) cell.textContent = i + 1;
     });
 }
 
@@ -184,7 +184,7 @@ function renderInvoice(inv) {
       <td class="r">${fmt(item.qty * item.rate)}</td>
     </tr>`).join('');
 
-    const emptyRows = Array(Math.max(0, 2 - inv.items.length)).fill('<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>').join('');
+    const emptyRows = Array(Math.max(0, 6 - inv.items.length)).fill('<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>').join('');
     const bankLines = (inv.bankText || '').split('\n').map(l => esc(l)).join('<br>');
 
     el.innerHTML = `
@@ -271,14 +271,14 @@ if (dropZone && fileInput) {
 }
 
 function handleCSV(f) {
-    hideError(); 
+    hideError();
     if (!f.name.endsWith('.csv')) { showError('Invalid file type.'); return; }
     Papa.parse(f, {
-        skipEmptyLines: true, 
+        skipEmptyLines: true,
         complete(r) {
             try {
-                const inv = parseCSV(r.data); 
-                renderInvoice(inv); 
+                const inv = parseCSV(r.data);
+                renderInvoice(inv);
                 showSection('preview');
                 document.getElementById('info-number').textContent = inv.invoiceNumber;
                 document.getElementById('info-customer').textContent = inv.receiverName;
@@ -343,21 +343,32 @@ if (btnDownload) {
 
         showToast('🔄 Generating PDF...');
 
-        // Ensure element is perfectly sized during capture
-        const originalWidth = el.style.width;
-        const originalBorder = el.style.border;
+        // Hardened capture styles
+        const originalStyle = {
+            width: el.style.width,
+            position: el.style.position,
+            left: el.style.left,
+            top: el.style.top,
+            margin: el.style.margin,
+            border: el.style.border,
+            zIndex: el.style.zIndex
+        };
+
         el.style.width = '800px';
-        el.style.border = 'none';
+        el.style.margin = '0';
+        el.style.position = 'fixed';
+        el.style.top = '0';
+        el.style.left = '0';
+        el.style.zIndex = '999999';
+        el.style.border = '1px solid #000'; // Keep border for PDF but ensure no double border
 
         html2pdf().set(opt).from(el).save().then(() => {
             showToast('✅ Download Started!');
-            el.style.width = originalWidth;
-            el.style.border = originalBorder;
+            Object.assign(el.style, originalStyle);
         }).catch(err => {
             console.error('PDF Error:', err);
             alert('PDF generation failed.');
-            el.style.width = originalWidth;
-            el.style.border = originalBorder;
+            Object.assign(el.style, originalStyle);
         });
     });
 }
@@ -426,17 +437,17 @@ function resetForm() {
     if (recvName) recvName.value = '';
     if (recvAddr) recvAddr.value = '';
     if (itemsBody) {
-        itemsBody.innerHTML = ''; 
+        itemsBody.innerHTML = '';
         addItemRow(null);
     }
 }
 
 function fmt(n) { return Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-function formatDate(s) { 
-    if (!s) return ''; 
-    const d = new Date(s); 
-    return isNaN(d) ? s : d.toLocaleDateString('en-IN', { day: 'numeric', month: '2-digit', year: 'numeric' }); 
+function formatDate(s) {
+    if (!s) return '';
+    const d = new Date(s);
+    return isNaN(d) ? s : d.toLocaleDateString('en-IN', { day: 'numeric', month: '2-digit', year: 'numeric' });
 }
 function showSection(n) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -444,25 +455,25 @@ function showSection(n) {
     if (section) section.classList.add('active');
     window.scrollTo(0, 0);
 }
-function showToast(m) { 
-    const t = document.getElementById('toast'); 
+function showToast(m) {
+    const t = document.getElementById('toast');
     if (t) {
-        t.textContent = m; 
-        t.classList.add('show'); 
-        setTimeout(() => t.classList.remove('show'), 3000); 
+        t.textContent = m;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
     }
 }
-function showError(m) { 
-    const e = document.getElementById('error-box'); 
+function showError(m) {
+    const e = document.getElementById('error-box');
     if (e) {
-        e.style.display = 'block'; 
+        e.style.display = 'block';
         const msg = document.getElementById('error-msg');
-        if (msg) msg.textContent = m; 
+        if (msg) msg.textContent = m;
     }
 }
-function hideError() { 
-    const e = document.getElementById('error-box'); 
-    if (e) e.style.display = 'none'; 
+function hideError() {
+    const e = document.getElementById('error-box');
+    if (e) e.style.display = 'none';
 }
 
 function numberToWords(num) {

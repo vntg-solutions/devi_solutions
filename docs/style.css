@@ -447,6 +447,8 @@ nav {
     display: flex;
     flex-direction: column;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    position: relative;
+    /* Ensure stable positioning for capture */
 }
 
 .bill-header {
@@ -669,11 +671,13 @@ nav {
 
 .gate-card {
     background: #1e293b;
-    padding: 40px;
+    padding: 30px 20px;
+    /* Reduced from 40 for mobile */
     border-radius: 16px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     width: 100%;
-    max-width: 400px;
+    max-width: 360px;
+    /* Slightly narrower for better mobile fit */
     text-align: center;
 }
 
