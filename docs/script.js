@@ -853,8 +853,6 @@ async function generatePDF(inv, PDFLib, fileName) {
     Y += 6;
 
     // ── BILL TITLE ───────────────────────────────────────────────
-    hLine(Y, 0.5);          // line ABOVE
-    Y += 6;
     setFont('bold', 14);
     doc.text('BILL', PW / 2, Y, { align: 'center' });
     Y += 5;
