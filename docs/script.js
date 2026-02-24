@@ -1045,7 +1045,6 @@ async function generatePDF(inv, PDFLib, fileName) {
 
     doc.save(fileName);
 }
-}
 
 /* ═══════════════════════════════════════════════════════════════
    BACK & RESET NAVIGATION
