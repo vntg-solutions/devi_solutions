@@ -479,31 +479,31 @@ if (btnDownload) {
             const rightEdge = marginX + frameWidth - 10;
             const pageCenterX = pageWidth / 2;
 
-            // Line above Grand Total (reference)
+            // Line above Grand Total
             doc.setLineWidth(0.3);
             doc.line(marginX, finalY + 2, marginX + frameWidth, finalY + 2);
 
-            // Grand Total: label aligned to right of RATE area, amount at right edge
+            // Grand Total: label left-aligned, amount right-aligned (expected layout)
             doc.setFontSize(10);
             doc.setFont('times', 'bold');
-            doc.text('Grand Total', totalColStart, finalY + 6, { align: 'right' });
+            doc.text('Grand Total', marginX + 3, finalY + 6);
             doc.text(fmt(total), rightEdge, finalY + 6, { align: 'right' });
 
             // Line below Grand Total
             doc.line(marginX, finalY + 10, marginX + frameWidth, finalY + 10);
 
-            // Amount in words (left) and Total: Rs. (right)
+            // Amount-in-words section (thin box: line above done, line below after this row)
             const words = numberToWords(total) || 'Zero';
             doc.setFont('times', 'normal');
             doc.text(`Amount in Words: ${words} Only`, marginX + 3, finalY + 16);
             doc.setFont('times', 'bold');
-            doc.text('Total: Rs. ' + fmt(total), rightEdge, finalY + 16, { align: 'right' });
+            doc.text('Total: \u20B9 ' + fmt(total), rightEdge, finalY + 16, { align: 'right' });
 
-            // Line above bank section
-            doc.line(marginX, finalY + 22, marginX + frameWidth, finalY + 22);
+            // Line below amount-in-words (box border)
+            doc.line(marginX, finalY + 20, marginX + frameWidth, finalY + 20);
 
-            // Bank details — centered (reference)
-            let bankY = finalY + 28;
+            // Bank details — centered, red
+            let bankY = finalY + 26;
             const bankLines = (inv.bankText || '').split('\n').filter(Boolean);
             if (bankLines.length) {
                 doc.setTextColor(198, 40, 40);
@@ -515,7 +515,26 @@ if (btnDownload) {
                 doc.setTextColor(0, 0, 0);
             }
 
-            // Helper to load image as Base64/Image
+            // Signature section: two halves (Receiver left, Authorized Signatory right)
+            const sigSectionTop = bankY + Math.max(bankLines.length * 5, 12) + 6;
+            const sigSectionHeight = 28;
+            doc.setLineWidth(0.3);
+            doc.line(marginX, sigSectionTop, marginX + frameWidth, sigSectionTop);
+
+            const sigMidX = marginX + frameWidth / 2;
+            doc.line(sigMidX, sigSectionTop, sigMidX, sigSectionTop + sigSectionHeight);
+
+            // Left half: (Receiver Name and Sign) at bottom-left
+            doc.setFontSize(9);
+            doc.setFont('times', 'normal');
+            doc.text('(Receiver Name and Sign)', marginX + 5, sigSectionTop + sigSectionHeight - 4);
+
+            // Right half: For Devi Technical Services, signature, line, (Authorized Signatory)
+            const rightHalfCenterX = marginX + frameWidth * 0.75;
+            doc.setFontSize(10);
+            doc.setFont('times', 'bold');
+            doc.text('For Devi Technical Services', rightHalfCenterX, sigSectionTop + 6, { align: 'center' });
+
             const loadImage = (src) => new Promise((resolve, reject) => {
                 const img = new Image();
                 img.crossOrigin = 'Anonymous';
@@ -523,28 +542,20 @@ if (btnDownload) {
                 img.onerror = (err) => reject(err);
                 img.src = src;
             });
-
-            // Signature area
-            const sigTop = pageHeight - marginY - 32;
-            doc.setFontSize(10);
-            doc.setFont('times', 'bold');
-            doc.text('For Devi Technical Services', marginX + frameWidth - 3, sigTop, { align: 'right' });
-
             try {
                 const sigImg = await loadImage('Sign.png');
-                doc.addImage(sigImg, 'PNG', marginX + frameWidth - 38, sigTop + 2, 35, 12);
+                doc.addImage(sigImg, 'PNG', rightHalfCenterX - 17, sigSectionTop + 8, 34, 12);
             } catch (e) {
                 console.warn('Signature image Sign.png not found:', e);
             }
 
             doc.setLineWidth(0.4);
-            doc.line(marginX + frameWidth - 40, sigTop + 16, marginX + frameWidth - 3, sigTop + 16);
+            doc.line(rightHalfCenterX - 20, sigSectionTop + 22, rightHalfCenterX + 20, sigSectionTop + 22);
             doc.setFontSize(9);
             doc.setFont('times', 'normal');
-            doc.text('(Authorized Signatory)', marginX + frameWidth - 3, sigTop + 21, { align: 'right' });
+            doc.text('(Authorized Signatory)', rightHalfCenterX, sigSectionTop + 26, { align: 'center' });
 
-            // Dynamic outer border: height based on content, not fixed full page
-            const contentBottom = Math.min(pageHeight - marginY, sigTop + 24);
+            const contentBottom = sigSectionTop + sigSectionHeight;
             doc.setLineWidth(0.6);
             doc.rect(marginX, marginY, frameWidth, contentBottom - marginY);
 
