@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GodownOS — Invoice Generator</title>
+
+    <!-- PapaParse: CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- html2pdf: client-side PDF generation (no server) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* ── Reset & Base ───────────────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --accent: #1A7A6E;
+            --accent-dk: #12594F;
+            --accent-lt: #EAF5F3;
+            --bg: #F0F2F0;
+            --surface: #FFFFFF;
+            --border: #E0E4E2;
+            --text: #1C1C1C;
+            --muted: #6B7280;
+            --danger: #DC2626;
+            --radius: 10px;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── Top Nav ────────────────────────────────────────────────── */
+        nav {
+            background: var(--accent);
+            padding: 0 32px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+        }
+
+        .nav-brand {
+            font-size: 17px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -.3px;
+        }
+
+        .nav-brand span {
+            opacity: .65;
+            font-weight: 400;
+        }
+
+        .nav-hint {
+            font-size: 12px;
+            color: rgba(255, 255, 255, .7);
+            background: rgba(255, 255, 255, .12);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        /* ── Page wrapper ───────────────────────────────────────────── */
+        .page {
+            max-width: 860px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* ── Upload Card ────────────────────────────────────────────── */
+        #upload-section {
+            display: block;
+        }
+
+        #result-section {
+            display: none;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 40px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .card-sub {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        /* Drop zone */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 52px 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s;
+            background: #fafafa;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            border-color: var(--accent);
+            background: var(--accent-lt);
+        }
+
+        .drop-icon {
+            font-size: 44px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .drop-main {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .drop-sub {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all .18s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dk);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--accent);
+            border: 1.5px solid var(--accent);
+        }
+
+        .btn-outline:hover {
+            background: var(--accent-lt);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--danger);
+            border: 1.5px solid #FECACA;
+        }
+
+        .btn-danger:hover {
+            background: #FEF2F2;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        /* Notice */
+        .notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: var(--accent-lt);
+            border: 1px solid #B2DFDA;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-top: 24px;
+            font-size: 12.5px;
+            color: #1A4A45;
+            line-height: 1.6;
+        }
+
+        .notice-icon {
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* Error */
+        .error-box {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 13px;
+            color: var(--danger);
+            margin-top: 20px;
+            display: none;
+        }
+
+        /* ── Invoice Preview ────────────────────────────────────────── */
+        #invoice-preview {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, .08);
+        }
+
+        /* Use a wrapper so preview scrolls on small screens */
+        .preview-scroll {
+            overflow-x: auto;
+        }
+
+        /* ─── The actual invoice (also used for PDF render) ─── */
+        #invoice-render {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            font-size: 13px;
+            color: #1C1C1C;
+            background: #fff;
+            width: 750px;
+            margin: 0 auto;
+        }
+
+        .inv-header {
+            background: #1A7A6E;
+            padding: 28px 36px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .inv-company-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .inv-company-meta {
+            font-size: 11px;
+            color: #C8E8E5;
+            margin-top: 5px;
+            line-height: 1.7;
+        }
+
+        .inv-header-right {
+            text-align: right;
+        }
+
+        .inv-label {
+            font-size: 26px;
+            font-weight: 300;
+            color: #fff;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .inv-number {
+            font-size: 11px;
+            color: #C8E8E5;
+            margin-top: 6px;
+        }
+
+        .inv-badge {
+            display: inline-block;
+            background: #fff;
+            color: #1A7A6E;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 2px 9px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        .inv-meta {
+            display: flex;
+            padding: 22px 36px;
+            border-bottom: 1px solid #E2E2DC;
+        }
+
+        .inv-meta-block {
+            flex: 1;
+        }
+
+        .inv-meta-label {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #9A9A9A;
+            margin-bottom: 5px;
+        }
+
+        .inv-meta-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1C1C1C;
+            line-height: 1.6;
+        }
+
+        .inv-meta-value-sub {
+            font-size: 11px;
+            color: #5A5A5A;
+            line-height: 1.6;
+        }
+
+        .inv-items {
+            padding: 22px 36px;
+        }
+
+        .inv-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .inv-table thead tr {
+            background: #EAF5F3;
+            border-bottom: 2px solid #1A7A6E;
+        }
+
+        .inv-table thead th {
+            padding: 9px 10px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #1A7A6E;
+            text-align: left;
+        }
+
+        .inv-table thead th.r {
+            text-align: right;
+        }
+
+        .inv-table tbody tr {
+            border-bottom: 1px solid #E2E2DC;
+        }
+
+        .inv-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .inv-table tbody td {
+            padding: 11px 10px;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+
+        .inv-table tbody td.r {
+            text-align: right;
+            color: #5A5A5A;
+        }
+
+        .inv-table tbody td.b {
+            text-align: right;
+            font-weight: 700;
+            color: #1C1C1C;
+        }
+
+        .inv-totals {
+            padding: 0 36px 24px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .inv-totals-inner {
+            width: 270px;
+        }
+
+        .inv-totals-inner table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .inv-totals-inner td {
+            padding: 5px 0;
+            font-size: 12px;
+            color: #5A5A5A;
+        }
+
+        .inv-totals-inner td.l {
+            text-align: left;
+        }
+
+        .inv-totals-inner td.r {
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .inv-totals-inner tr.grand td {
+            border-top: 2px solid #1A7A6E;
+            padding-top: 10px;
+            color: #1C1C1C;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .inv-notes {
+            background: #EAF5F3;
+            border-top: 1px solid #E2E2DC;
+            padding: 18px 36px;
+        }
+
+        .inv-notes-label {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #1A7A6E;
+            margin-bottom: 5px;
+        }
+
+        .inv-notes-text {
+            font-size: 11px;
+            color: #5A5A5A;
+            line-height: 1.6;
+        }
+
+        .inv-footer {
+            background: #1C1C1C;
+            color: #9A9A9A;
+            padding: 12px 36px;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        /* ── Result action bar ──────────────────────────────────────── */
+        .action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .action-info {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .action-info strong {
+            color: var(--text);
+        }
+
+        /* ── Download flash ─────────────────────────────────────────── */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1C1C1C;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all .3s;
+            pointer-events: none;
+            z-index: 9999;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── Nav ── -->
+    <nav>
+        <span class="nav-brand">GodownOS <span>/ Invoice Generator</span></span>
+        <span class="nav-hint">🔒 Your data never leaves this browser</span>
+    </nav>
+
+    <div class="page">
+
+        <!-- ══════════════ UPLOAD SECTION ══════════════ -->
+        <div id="upload-section">
+            <div class="card">
+                <div class="card-title">Generate Invoice from CSV</div>
+                <div class="card-sub">
+                    Upload your invoice data as a CSV file. The PDF is generated instantly in your browser —
+                    nothing is sent to any server.
+                </div>
+
+                <!-- Drop zone -->
+                <div class="drop-zone" id="drop-zone">
+                    <span class="drop-icon">📄</span>
+                    <div class="drop-main">Drag &amp; drop your CSV file here</div>
+                    <div class="drop-sub">or click to browse</div>
+                    <input type="file" id="file-input" accept=".csv" />
+                </div>
+
+                <!-- Error -->
+                <div class="error-box" id="error-box">⚠️ <span id="error-msg"></span></div>
+
+                <div class="btn-row">
+                    <a href="sample-invoice.csv" download class="btn btn-outline">
+                        ⬇ Download Sample CSV
+                    </a>
+                </div>
+
+                <div class="notice">
+                    <span class="notice-icon">🔒</span>
+                    <span>
+                        <strong>Privacy first.</strong> Your CSV is read locally in your browser.
+                        No data is uploaded, stored, or logged anywhere.
+                        The invoice is cleared from memory as soon as you close this tab.
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════ RESULT SECTION ══════════════ -->
+        <div id="result-section">
+            <div class="action-bar" style="margin-bottom:16px;">
+                <div class="action-info">
+                    Invoice <strong id="info-number"></strong> ready for <strong id="info-customer"></strong>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-outline" id="btn-new">↩ New Invoice</button>
+                    <button class="btn btn-primary" id="btn-download">⬇ Download PDF</button>
+                </div>
+            </div>
+
+            <!-- Invoice preview (scrollable on mobile) -->
+            <div id="invoice-preview">
+                <div class="preview-scroll">
+                    <div id="invoice-render"><!-- filled by JS --></div>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <div class="action-info" style="font-size:12px;">
+                    ⚡ PDF is generated in your browser. After download, all data is cleared.
+                </div>
+                <button class="btn btn-danger" id="btn-clear">🗑 Clear &amp; Start Over</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        /* ──────────────────────────────────────────────────────────────
+           GodownOS Invoice Generator — Browser-Side Logic
+           ────────────────────────────────────────────────────────────── */
+
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const uploadSec = document.getElementById('upload-section');
+        const resultSec = document.getElementById('result-section');
+        const errorBox = document.getElementById('error-box');
+        const errorMsg = document.getElementById('error-msg');
+        const invoiceEl = document.getElementById('invoice-render');
+
+        // ── Drag & drop ───────────────────────────────────────────────
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+        });
+        fileInput.addEventListener('change', e => {
+            if (e.target.files[0]) handleFile(e.target.files[0]);
+        });
+
+        // ── Buttons ───────────────────────────────────────────────────
+        document.getElementById('btn-download').addEventListener('click', downloadPDF);
+        document.getElementById('btn-new').addEventListener('click', resetApp);
+        document.getElementById('btn-clear').addEventListener('click', resetApp);
+
+        // ── File handler ──────────────────────────────────────────────
+        function handleFile(file) {
+            hideError();
+            if (!file.name.endsWith('.csv')) {
+                showError('Please upload a .csv file.');
+                return;
+            }
+
+            Papa.parse(file, {
+                skipEmptyLines: true,
+                complete(results) {
+                    try {
+                        const invoice = parseCSV(results.data);
+                        renderInvoice(invoice);
+                        showResult(invoice);
+                    } catch (err) {
+                        showError(err.message);
+                    }
+                },
+                error(err) { showError('Could not read CSV: ' + err.message); }
+            });
+        }
+
+        function parseCSV(rows) {
+            const inv = {
+                invoiceNumber: '', invoiceDate: '', dueDate: '',
+                companyName: '', companyAddress: '', companyEmail: '',
+                customerName: '', customerEmail: '', customerAddress: '',
+                notes: '', items: []
+            };
+
+            const keyMap = {
+                'invoice number': 'invoiceNumber',
+                'invoice date': 'invoiceDate',
+                'due date': 'dueDate',
+                'company name': 'companyName',
+                'company address': 'companyAddress',
+                'company email': 'companyEmail',
+                'customer name': 'customerName',
+                'customer email': 'customerEmail',
+                'customer address': 'customerAddress',
+                'notes': 'notes'
+            };
+
+            let inItems = false;
+            let itemHeaderSeen = false;
+
+            for (const row of rows) {
+                const col0 = (row[0] || '').trim();
+                if (!col0) continue;
+
+                // Detect items section marker
+                if (col0.toUpperCase() === 'ITEMS' || col0.toUpperCase() === '--- ITEMS ---') {
+                    inItems = true;
+                    continue;
+                }
+
+                if (inItems) {
+                    // Skip the "Description, Quantity, Unit Price" header row
+                    if (!itemHeaderSeen && col0.toLowerCase().startsWith('description')) {
+                        itemHeaderSeen = true;
+                        continue;
+                    }
+                    const description = col0;
+                    const quantity = parseFloat((row[1] || '').trim()) || 0;
+                    const unitPrice = parseFloat((row[2] || '').trim().replace(/,/g, '')) || 0;
+                    if (description && quantity && unitPrice) {
+                        inv.items.push({ description, quantity, unitPrice });
+                    }
+                } else {
+                    const key = col0.toLowerCase();
+                    const value = (row[1] || '').trim();
+                    if (keyMap[key]) inv[keyMap[key]] = value;
+                }
+            }
+
+            // Validate required fields
+            if (!inv.invoiceNumber) throw new Error('Missing "Invoice Number" in your CSV.');
+            if (!inv.customerName) throw new Error('Missing "Customer Name" in your CSV.');
+            if (inv.items.length === 0) throw new Error('No items found. Add an ITEMS section to your CSV.');
+
+            return inv;
+        }
+
+        // ── Maths ─────────────────────────────────────────────────────
+        function fmt(n) {
+            return Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        function subtotal(items) { return items.reduce((s, i) => s + i.quantity * i.unitPrice, 0); }
+        function tax(items) { return subtotal(items) * 0.18; }
+        function grand(items) { return subtotal(items) + tax(items); }
+
+        // ── Render invoice HTML ───────────────────────────────────────
+        function renderInvoice(inv) {
+            const itemRows = inv.items.map((item, idx) => `
+    <tr>
+      <td>${idx + 1}</td>
+      <td>${esc(item.description)}</td>
+      <td class="r">${item.quantity}</td>
+      <td class="r">&#8377; ${fmt(item.unitPrice)}</td>
+      <td class="b">&#8377; ${fmt(item.quantity * item.unitPrice)}</td>
+    </tr>`).join('');
+
+            const notesHtml = inv.notes ? `
+    <div class="inv-notes">
+      <div class="inv-notes-label">Notes</div>
+      <div class="inv-notes-text">${esc(inv.notes)}</div>
+    </div>` : '';
+
+            invoiceEl.innerHTML = `
+    <div class="inv-header">
+      <div>
+        <div class="inv-company-name">${esc(inv.companyName || 'Your Company')}</div>
+        <div class="inv-company-meta">
+          ${esc(inv.companyAddress || '')}<br>
+          ${esc(inv.companyEmail || '')}
+        </div>
+      </div>
+      <div class="inv-header-right">
+        <div class="inv-label">Invoice</div>
+        <div class="inv-number"># ${esc(inv.invoiceNumber)}</div>
+        <div><span class="inv-badge">Due</span></div>
+      </div>
+    </div>
+
+    <div class="inv-meta">
+      <div class="inv-meta-block" style="flex:2;">
+        <div class="inv-meta-label">Bill To</div>
+        <div class="inv-meta-value">${esc(inv.customerName)}</div>
+        <div class="inv-meta-value-sub">${esc(inv.customerEmail)}</div>
+        <div class="inv-meta-value-sub">${esc(inv.customerAddress)}</div>
+      </div>
+      <div class="inv-meta-block">
+        <div class="inv-meta-label">Invoice Date</div>
+        <div class="inv-meta-value">${fmtDate(inv.invoiceDate)}</div>
+      </div>
+      <div class="inv-meta-block">
+        <div class="inv-meta-label">Due Date</div>
+        <div class="inv-meta-value">${fmtDate(inv.dueDate)}</div>
+      </div>
+    </div>
+
+    <div class="inv-items">
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th style="width:5%">#</th>
+            <th style="width:50%">Description</th>
+            <th class="r" style="width:10%">Qty</th>
+            <th class="r" style="width:17%">Unit Price</th>
+            <th class="r" style="width:18%">Total</th>
+          </tr>
+        </thead>
+        <tbody>${itemRows}</tbody>
+      </table>
+    </div>
+
+    <div class="inv-totals">
+      <div class="inv-totals-inner">
+        <table>
+          <tr>
+            <td class="l">Subtotal</td>
+            <td class="r">&#8377; ${fmt(subtotal(inv.items))}</td>
+          </tr>
+          <tr>
+            <td class="l">GST (18%)</td>
+            <td class="r">&#8377; ${fmt(tax(inv.items))}</td>
+          </tr>
+          <tr class="grand">
+            <td class="l">Grand Total</td>
+            <td class="r">&#8377; ${fmt(grand(inv.items))}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    ${notesHtml}
+
+    <div class="inv-footer">
+      Generated by GodownOS Invoice Generator &nbsp;|&nbsp;
+      This is a computer-generated document — no signature required.
+    </div>
+  `;
+        }
+
+        // ── Download PDF (then auto-clear) ────────────────────────────
+        function downloadPDF() {
+            const el = invoiceEl;
+            const number = document.getElementById('info-number').textContent || 'invoice';
+            const filename = `GodownOS-${number}.pdf`;
+
+            const opt = {
+                margin: [8, 8, 8, 8],
+                filename,
+                image: { type: 'jpeg', quality: 0.97 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(el).save().then(() => {
+                showToast('✅ Invoice downloaded!');
+                // Clear data 2 s after download
+                setTimeout(resetApp, 2000);
+            });
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────
+        function showResult(inv) {
+            document.getElementById('info-number').textContent = inv.invoiceNumber;
+            document.getElementById('info-customer').textContent = inv.customerName;
+            uploadSec.style.display = 'none';
+            resultSec.style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function resetApp() {
+            // Wipe all data
+            invoiceEl.innerHTML = '';
+            fileInput.value = '';
+            document.getElementById('info-number').textContent = '';
+            document.getElementById('info-customer').textContent = '';
+            uploadSec.style.display = 'block';
+            resultSec.style.display = 'none';
+            hideError();
+            window.scrollTo(0, 0);
+        }
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorBox.style.display = 'block';
+        }
+        function hideError() { errorBox.style.display = 'none'; }
+
+        function esc(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function fmtDate(str) {
+            if (!str) return '—';
+            const d = new Date(str);
+            if (isNaN(d)) return str;
+            return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+
+</html>

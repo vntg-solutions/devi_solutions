@@ -1,0 +1,17 @@
+Field,Value
+Invoice Number,INV-2026-001
+Invoice Date,2026-02-24
+Due Date,2026-03-10
+Company Name,GodownOS Technologies
+Company Address,"12B Industrial Estate, Andheri East, Mumbai - 400093"
+Company Email,billing@godownos.io
+Customer Name,Rajesh Warehouse Solutions Pvt. Ltd.
+Customer Email,accounts@rajeshwh.com
+Customer Address,"Plot 47, MIDC Bhosari, Pune - 411026"
+Notes,Payment due within 15 days. Transfer to HDFC Bank A/C 012345678912 IFSC HDFC0001234.
+ITEMS
+Description,Quantity,Unit Price
+Pallet Storage - Zone A (per pallet/month),20,850
+Cold-Chain Storage - Zone C (per sqft/month),5,1200
+Inward Handling and Labelling Service,3,2500
+GodownOS SaaS Licence - Business Plan,1,4999
