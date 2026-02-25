@@ -816,23 +816,23 @@ if (btnDownload) {
  * A4 portrait, Times font, clean bordered sections, guaranteed no column wrap.
  */
 async function generatePDF(inv, PDFLib, fileName) {
-    const doc  = new PDFLib({ orientation: 'p', unit: 'mm', format: 'a4', putOnlyUsedFonts: true });
-    const PW   = doc.internal.pageSize.getWidth();   // 210
-    const PH   = doc.internal.pageSize.getHeight();  // 297
-    const MX   = 12;   // left/right margin
-    const FW   = PW - MX * 2;                        // 186 mm usable width
+    const doc = new PDFLib({ orientation: 'p', unit: 'mm', format: 'a4', putOnlyUsedFonts: true });
+    const PW = doc.internal.pageSize.getWidth();   // 210
+    const PH = doc.internal.pageSize.getHeight();  // 297
+    const MX = 12;   // left/right margin
+    const FW = PW - MX * 2;                        // 186 mm usable width
     const FONT = 'times';
-    const RED  = [192, 0, 0];
+    const RED = [192, 0, 0];
     const GREY = [240, 240, 240];
     const BLACK = [0, 0, 0];
 
     // ── Helpers ─────────────────────────────────────────────
-    const sf  = (style, size) => { doc.setFont(FONT, style); doc.setFontSize(size); };
-    const sc  = (rgb)         => doc.setTextColor(...rgb);
-    const slw = (w)           => doc.setLineWidth(w);
-    const hl  = (y, w = 0.4) => { slw(w); doc.line(MX, y, MX + FW, y); };
-    const vl  = (x, y1, y2, w = 0.4) => { slw(w); doc.line(x, y1, x, y2); };
-    const txt = (s)           => pdfSafe(s);
+    const sf = (style, size) => { doc.setFont(FONT, style); doc.setFontSize(size); };
+    const sc = (rgb) => doc.setTextColor(...rgb);
+    const slw = (w) => doc.setLineWidth(w);
+    const hl = (y, w = 0.4) => { slw(w); doc.line(MX, y, MX + FW, y); };
+    const vl = (x, y1, y2, w = 0.4) => { slw(w); doc.line(x, y1, x, y2); };
+    const txt = (s) => pdfSafe(s);
 
     let Y = MX + 8;
 
@@ -867,11 +867,11 @@ async function generatePDF(inv, PDFLib, fileName) {
     //  SECTION 3 — META (Bill info | Receiver)
     // ════════════════════════════════════════════════════
     const META_START = Y;
-    const MID        = MX + FW / 2;
-    const LX         = MX + 4;
-    const RX         = MID + 6;
-    const COLON_X    = LX + 20;
-    const RVAL_X     = RX + 22;
+    const MID = MX + FW / 2;
+    const LX = MX + 4;
+    const RX = MID + 6;
+    const COLON_X = LX + 20;
+    const RVAL_X = RX + 22;
 
     // Left — bill info
     sf('bold', 10); sc(BLACK);
@@ -892,16 +892,16 @@ async function generatePDF(inv, PDFLib, fileName) {
     slw(0.25); doc.line(RX, RY + 1.2, RX + doc.getTextWidth(HT), RY + 1.2);
     RY += 8;
 
-    sf('bold', 10);  doc.text('Name',    RX, RY);
+    sf('bold', 10); doc.text('Name', RX, RY);
     sf('normal', 10);
     const nmLns = doc.splitTextToSize(': ' + txt(inv.receiverName || '-'), FW / 2 - 32);
     doc.text(nmLns, RVAL_X, RY);
     RY += Math.max(1, nmLns.length) * 5.5 + 2;
 
-    sf('bold', 10);  doc.text('Address', RX, RY);
+    sf('bold', 10); doc.text('Address', RX, RY);
     sf('normal', 10);
     const addrStr = txt((inv.receiverAddr || '').replace(/\n/g, ', '));
-    const adLns   = doc.splitTextToSize(': ' + addrStr, FW / 2 - 32);
+    const adLns = doc.splitTextToSize(': ' + addrStr, FW / 2 - 32);
     doc.text(adLns, RVAL_X, RY);
     RY += Math.max(1, adLns.length) * 5.5 + 3;
 
@@ -916,8 +916,8 @@ async function generatePDF(inv, PDFLib, fileName) {
     //  NO=12  NAME=60  HSN=22  UOM=16  QTY=14  RATE=32  TOTAL=30
     //  At 9pt with 2.5mm L/R padding: HSN text space = 17mm > 12mm needed ✓
     // ════════════════════════════════════════════════════
-    const total     = inv.items.reduce((s, it) => s + (it.qty || 0) * (it.rate || 0), 0);
-    const COL_ALIGN = { 0:'left', 1:'left', 2:'center', 3:'center', 4:'center', 5:'right', 6:'right' };
+    const total = inv.items.reduce((s, it) => s + (it.qty || 0) * (it.rate || 0), 0);
+    const COL_ALIGN = { 0: 'left', 1: 'left', 2: 'center', 3: 'center', 4: 'center', 5: 'right', 6: 'right' };
 
     const tableBody = inv.items.map((it, i) => [
         (i + 1) + '.',
@@ -1025,7 +1025,7 @@ async function generatePDF(inv, PDFLib, fileName) {
         const sigImg = await new Promise((resolve, reject) => {
             const img = new Image();
             img.crossOrigin = 'Anonymous';
-            img.onload  = () => resolve(img);
+            img.onload = () => resolve(img);
             img.onerror = reject;
             img.src = 'Sign.png';
         });
@@ -1108,7 +1108,37 @@ function checkAuth() {
         gate.style.display = 'none';
         document.body.style.overflow = '';
     } else {
-        gate.style.display = 'flex';
+        // Use setProperty('important') — inline !important, highest possible CSS priority
+        const gateStyles = {
+            'position': 'fixed',
+            'top': '0',
+            'left': '0',
+            'right': '0',
+            'bottom': '0',
+            'width': '100vw',
+            'height': '100vh',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center',
+            'background': '#0f172a',
+            'z-index': '10000',
+            'padding': '20px',
+            'box-sizing': 'border-box',
+        };
+        Object.entries(gateStyles).forEach(([prop, val]) =>
+            gate.style.setProperty(prop, val, 'important')
+        );
+        const card = gate.querySelector('.gate-card');
+        if (card) {
+            card.style.setProperty('position', 'relative', 'important');
+            card.style.setProperty('top', 'auto', 'important');
+            card.style.setProperty('left', 'auto', 'important');
+            card.style.setProperty('transform', 'none', 'important');
+            card.style.setProperty('margin', 'auto', 'important');
+            card.style.setProperty('width', '100%', 'important');
+            card.style.setProperty('max-width', '360px', 'important');
+            card.style.setProperty('flex-shrink', '0', 'important');
+        }
         document.body.style.overflow = 'hidden';
     }
 }
