@@ -1,0 +1,261 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Devi Technical Services — Bill Generator</title>
+    <meta name="description"
+        content="Professional bill generator for Devi Technical Services. Create, preview, and download PDF bills instantly." />
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <!-- ══════════════════════════════════════════════════
+         SECURITY GATE
+    ═══════════════════════════════════════════════════ -->
+    <div id="security-gate">
+        <div class="gate-card">
+            <div class="gate-logo">DT</div>
+            <h2>Authorized Access Only</h2>
+            <p>Please enter the security password to access the Bill Generator.</p>
+            <input type="password" id="gate-pass" placeholder="Enter password" autocomplete="current-password" />
+            <button id="gate-btn">Verify Access</button>
+            <div id="gate-error">⚠ Invalid password. Please try again.</div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         PDF PROGRESS OVERLAY
+    ═══════════════════════════════════════════════════ -->
+    <div id="pdf-progress" aria-live="polite" aria-label="Generating PDF">
+        <div class="progress-card">
+            <div class="progress-spinner"></div>
+            <div class="progress-msg" id="progress-msg">Generating PDF…</div>
+            <div class="progress-sub">Please wait a moment</div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         NAV
+    ═══════════════════════════════════════════════════ -->
+    <nav>
+        <span class="nav-brand">
+            <i>DT</i>
+            Devi Technical Services
+            <span>/ Bill Generator</span>
+        </span>
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-tab="form" role="tab" aria-selected="true">✏️ Fill Form</div>
+            <div class="nav-tab" data-tab="upload" role="tab" aria-selected="false">📄 Upload CSV</div>
+        </div>
+    </nav>
+
+    <div class="page">
+
+        <!-- ══════════════════════════════════════════════
+             TAB 1: MANUAL FORM INPUT
+        ═══════════════════════════════════════════════ -->
+        <div class="section active" id="sec-form">
+
+            <!-- Bill Details -->
+            <div class="card">
+                <div class="card-hd">📄 Bill Details</div>
+                <div class="fg">
+                    <div class="field" id="field-invNo">
+                        <label for="f-invNo">Bill Number <span class="required-star">*</span></label>
+                        <input type="text" id="f-invNo" placeholder="e.g. 131" autocomplete="off" />
+                        <span class="field-error" id="err-invNo"></span>
+                    </div>
+                    <div class="field">
+                        <label for="f-invDate">Bill Date</label>
+                        <input type="date" id="f-invDate" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receiver -->
+            <div class="card">
+                <div class="card-hd">👤 Receiver / Billed To</div>
+                <div class="fg">
+                    <div class="field" id="field-recvName">
+                        <label for="f-recvName">Party Name <span class="required-star">*</span></label>
+                        <input type="text" id="f-recvName" placeholder="e.g. Pristine Utilities Pvt. Ltd." />
+                        <span class="field-error" id="err-recvName"></span>
+                    </div>
+                    <div class="field">
+                        <label for="f-recvAddr">Full Address</label>
+                        <textarea id="f-recvAddr" placeholder="Street, City, Pincode…"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items -->
+            <div class="card">
+                <div class="card-hd">🛠 Products / Services</div>
+                <div class="items-table-wrapper">
+                    <table class="items-table" aria-label="Bill items">
+                        <thead>
+                            <tr>
+                                <th style="width:5%">#</th>
+                                <th style="width:39%">Product / Service</th>
+                                <th style="width:10%">HSN/SAC</th>
+                                <th style="width:10%">UOM</th>
+                                <th style="width:8%">Qty</th>
+                                <th style="width:13%" class="r">Rate (₹)</th>
+                                <th style="width:12%" class="r">Total (₹)</th>
+                                <th style="width:3%"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-body"></tbody>
+                    </table>
+                </div>
+                <span class="field-error" id="err-items"></span>
+                <button class="btn-add-row" id="btn-add-item" type="button">+ Add New Item Row</button>
+            </div>
+
+            <!-- Bank Details -->
+            <div class="card">
+                <div class="card-hd">🏦 Bank Details</div>
+                <div class="fg full">
+                    <div class="field">
+                        <label for="f-bank">Select Bank Account</label>
+                        <select id="f-bank">
+                            <option value="0">Jaya Mishra — A/C 677802010011687, Union Bank, IFSC: UBIN0567787</option>
+                            <option value="1">Devi Technical Services — A/C 920020043613270, Axis Bank, IFSC:
+                                UTIB0001234</option>
+                            <option value="custom">✏️ Custom (type below)</option>
+                        </select>
+                    </div>
+                    <div class="field" id="custom-bank-field" style="display:none;">
+                        <label for="f-bankCustom">Custom Bank Details</label>
+                        <textarea id="f-bankCustom"
+                            placeholder="Account Name, Number, Bank Name, IFSC code…"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="btn-row">
+                <button class="btn btn-primary" id="btn-preview" type="button">👁 Preview Bill</button>
+                <button class="btn btn-outline" id="btn-reset-form" type="button">↩ Clear Form</button>
+            </div>
+
+        </div><!-- /sec-form -->
+
+        <!-- ══════════════════════════════════════════════
+             TAB 2: CSV UPLOAD
+        ═══════════════════════════════════════════════ -->
+        <div class="section" id="sec-upload">
+            <div class="card" style="padding:40px;">
+                <div class="card-hd" style="border:none;justify-content:center;font-size:20px;">📤 CSV Upload</div>
+
+                <!-- Drop Zone -->
+                <div class="drop-zone" id="drop-zone" role="button" aria-label="Drop CSV file here or click to browse">
+                    <div class="drop-icon-container">
+                        <span class="drop-icon">📊</span>
+                    </div>
+                    <div class="drop-main">Drop your CSV file here</div>
+                    <div class="drop-sub">Supported format: .csv — or click to browse</div>
+                    <input type="file" id="file-input" accept=".csv" />
+                    <button class="btn btn-primary" type="button" style="margin-top:10px;" id="browse-btn">Browse
+                        Files</button>
+                </div>
+
+                <!-- Error box -->
+                <div class="error-box" id="error-box" role="alert">⚠️ <span id="error-msg"></span></div>
+
+                <div class="btn-row" style="margin-top:20px;">
+                    <a href="sample-invoice.csv" download class="btn btn-outline">📄 Download Template CSV</a>
+                </div>
+
+                <div class="notice">
+                    <span style="font-size:20px;">🛡️</span>
+                    <span>Secure Local Processing: Your data stays on your machine. No cloud storage used.</span>
+                </div>
+            </div>
+
+            <!-- CSV Preview Table (shown after successful parse) -->
+            <div id="csv-preview-wrap" style="display:none;">
+                <div class="card">
+                    <div class="card-hd">
+                        <span>📋 Parsed CSV Preview</span>
+                        <span id="csv-summary-badge" class="csv-badge"></span>
+                    </div>
+
+                    <!-- Meta info strip -->
+                    <div class="csv-meta-grid" id="csv-meta-grid"></div>
+
+                    <!-- Items preview table -->
+                    <div class="csv-table-scroll">
+                        <table class="csv-preview-table" id="csv-items-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Description</th>
+                                    <th>HSN/SAC</th>
+                                    <th>UOM</th>
+                                    <th>Qty</th>
+                                    <th>Rate (₹)</th>
+                                    <th>Total (₹)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="csv-items-body"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Validation summary -->
+                    <div id="csv-validation-msg" class="csv-validation-msg"></div>
+
+                    <!-- Actions -->
+                    <div class="btn-row" style="margin-top:20px;">
+                        <button class="btn btn-primary" id="btn-csv-generate" type="button">✅ Generate Bill</button>
+                        <button class="btn btn-outline" id="btn-csv-reupload" type="button">🔄 Re-upload</button>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /sec-upload -->
+
+        <!-- ══════════════════════════════════════════════
+             PREVIEW / RESULT
+        ═══════════════════════════════════════════════ -->
+        <div class="section" id="sec-preview">
+            <div class="action-bar">
+                <div class="action-info">
+                    Bill <strong id="info-number"></strong> for <strong id="info-customer"></strong>
+                </div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                    <button class="btn btn-outline" id="btn-back-edit"
+                        style="border-color:#fff;color:#fff;background:rgba(255,255,255,0.1);">✏️ Back to Edit</button>
+                    <button class="btn btn-primary" id="btn-download"
+                        style="background:#FCA311;color:#000;box-shadow:none;">⬇ Download PDF</button>
+                </div>
+            </div>
+
+            <div class="preview-scroll">
+                <div class="preview-scale-wrapper">
+                    <div id="invoice-render"></div>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-outline" id="btn-new2" style="background:#fff;" type="button">🗑 Start New
+                    Bill</button>
+            </div>
+        </div><!-- /sec-preview -->
+
+    </div><!-- /page -->
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="script.js?v=7" defer></script>
+</body>
+
+</html>

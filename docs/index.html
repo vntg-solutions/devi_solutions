@@ -4,258 +4,233 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Devi Technical Services — Bill Generator</title>
+    <title>Devi Technical Services — Smart Business Solutions</title>
     <meta name="description"
-        content="Professional bill generator for Devi Technical Services. Create, preview, and download PDF bills instantly." />
-    <!-- Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
-    <link rel="stylesheet" href="style.css" />
+        content="Devi Technical Services delivers professional technical and business solutions — from IT consulting to automated billing and beyond." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="landing.css" />
 </head>
 
 <body>
 
     <!-- ══════════════════════════════════════════════════
-         SECURITY GATE
-    ═══════════════════════════════════════════════════ -->
-    <div id="security-gate">
-        <div class="gate-card">
-            <div class="gate-logo">DT</div>
-            <h2>Authorized Access Only</h2>
-            <p>Please enter the security password to access the Bill Generator.</p>
-            <input type="password" id="gate-pass" placeholder="Enter password" autocomplete="current-password" />
-            <button id="gate-btn">Verify Access</button>
-            <div id="gate-error">⚠ Invalid password. Please try again.</div>
-        </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════════════
-         PDF PROGRESS OVERLAY
-    ═══════════════════════════════════════════════════ -->
-    <div id="pdf-progress" aria-live="polite" aria-label="Generating PDF">
-        <div class="progress-card">
-            <div class="progress-spinner"></div>
-            <div class="progress-msg" id="progress-msg">Generating PDF…</div>
-            <div class="progress-sub">Please wait a moment</div>
-        </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════════════
-         NAV
-    ═══════════════════════════════════════════════════ -->
-    <nav>
-        <span class="nav-brand">
-            <i>DT</i>
-            Devi Technical Services
-            <span>/ Bill Generator</span>
-        </span>
-        <div class="nav-tabs">
-            <div class="nav-tab active" data-tab="form" role="tab" aria-selected="true">✏️ Fill Form</div>
-            <div class="nav-tab" data-tab="upload" role="tab" aria-selected="false">📄 Upload CSV</div>
-        </div>
+       NAVBAR
+  ═══════════════════════════════════════════════════ -->
+    <nav class="navbar">
+        <a href="#" class="nav-logo" aria-label="Devi Technical Services Home">
+            <div class="nav-logo-badge">DT</div>
+            <div class="nav-logo-text">
+                Devi Technical Services
+                <span>vntg.solutions</span>
+            </div>
+        </a>
+        <a href="invoice.html" class="nav-cta" id="nav-bill-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14,2 14,8 20,8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10,9 9,9 8,9" />
+            </svg>
+            Open Bill Generator
+        </a>
     </nav>
 
-    <div class="page">
+    <!-- ══════════════════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════════════════ -->
+    <section class="hero" id="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
 
-        <!-- ══════════════════════════════════════════════
-             TAB 1: MANUAL FORM INPUT
-        ═══════════════════════════════════════════════ -->
-        <div class="section active" id="sec-form">
+            <div class="hero-badge">
+                Trusted Technical Partner
+            </div>
 
-            <!-- Bill Details -->
-            <div class="card">
-                <div class="card-hd">📄 Bill Details</div>
-                <div class="fg">
-                    <div class="field" id="field-invNo">
-                        <label for="f-invNo">Bill Number <span class="required-star">*</span></label>
-                        <input type="text" id="f-invNo" placeholder="e.g. 131" autocomplete="off" />
-                        <span class="field-error" id="err-invNo"></span>
-                    </div>
-                    <div class="field">
-                        <label for="f-invDate">Bill Date</label>
-                        <input type="date" id="f-invDate" />
-                    </div>
+            <h1>
+                Powering Business Operations<br />
+                with <span class="grad">Smart Tech</span>
+            </h1>
+
+            <p>
+                Professional technical solutions tailored for modern businesses —
+                from seamless billing to end-to-end IT support, we handle the tech
+                so you can focus on growth.
+            </p>
+
+            <div class="hero-btns">
+                <a href="invoice.html" class="btn-primary" id="hero-bill-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14,2 14,8 20,8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    Open Bill Generator
+                </a>
+                <a href="#services" class="btn-secondary" id="hero-services-btn">
+                    Explore Services ↓
+                </a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-num">100%</div>
+                    <div class="stat-label">Local & Secure</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">0s</div>
+                    <div class="stat-label">Cloud Upload</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">PDF</div>
+                    <div class="stat-label">Instant Export</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">GST</div>
+                    <div class="stat-label">Compliant Bills</div>
                 </div>
             </div>
 
-            <!-- Receiver -->
-            <div class="card">
-                <div class="card-hd">👤 Receiver / Billed To</div>
-                <div class="fg">
-                    <div class="field" id="field-recvName">
-                        <label for="f-recvName">Party Name <span class="required-star">*</span></label>
-                        <input type="text" id="f-recvName" placeholder="e.g. Pristine Utilities Pvt. Ltd." />
-                        <span class="field-error" id="err-recvName"></span>
-                    </div>
-                    <div class="field">
-                        <label for="f-recvAddr">Full Address</label>
-                        <textarea id="f-recvAddr" placeholder="Street, City, Pincode…"></textarea>
-                    </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+       SERVICES
+  ═══════════════════════════════════════════════════ -->
+    <section class="services" id="services">
+        <div class="services-header reveal">
+            <span class="section-label">What We Do</span>
+            <h2 class="section-title">Our Services</h2>
+            <p class="section-sub">Comprehensive technical services designed to streamline your business operations from
+                day one.</p>
+        </div>
+
+        <div class="services-grid">
+
+            <div class="service-card reveal">
+                <div class="service-icon" style="background:rgba(59,130,246,0.12);">📄</div>
+                <h3>Bill & Invoice Management</h3>
+                <p>Generate professional GST-compliant bills and invoices instantly. Manual form entry or CSV bulk
+                    upload — download as PDF in seconds.</p>
+            </div>
+
+            <div class="service-card reveal">
+                <div class="service-icon" style="background:rgba(6,182,212,0.12);">🖥️</div>
+                <h3>IT Consulting & Support</h3>
+                <p>End-to-end IT support for your business infrastructure — hardware, software, networking, and
+                    troubleshooting handled by experts.</p>
+            </div>
+
+            <div class="service-card reveal">
+                <div class="service-icon" style="background:rgba(139,92,246,0.12);">⚙️</div>
+                <h3>Business Automation</h3>
+                <p>Automate repetitive business workflows with custom tooling — save hours each week and reduce manual
+                    errors across your operations.</p>
+            </div>
+
+            <div class="service-card reveal">
+                <div class="service-icon" style="background:rgba(245,158,11,0.12);">📊</div>
+                <h3>Technical Consulting</h3>
+                <p>Strategic technology guidance to help your business adopt the right tools, processes, and systems for
+                    sustainable long-term growth.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+       WHY US
+  ═══════════════════════════════════════════════════ -->
+    <section class="why" id="why">
+        <div class="why-inner">
+
+            <div class="why-text reveal">
+                <span class="section-label">Why Choose Us</span>
+                <h2 class="section-title">Built for Trust,<br />Designed for Speed</h2>
+                <p class="section-sub">We believe great technology should be simple, private, and powerful. Everything
+                    we build puts your data and time first.</p>
+
+                <ul class="why-list">
+                    <li>No cloud dependency — your data never leaves your device</li>
+                    <li>Professional output with GST & Indian tax compliance built-in</li>
+                    <li>Works on any browser, any device — no installation required</li>
+                    <li>Dedicated support from a team that understands your business</li>
+                    <li>Fast delivery — go from data entry to professional PDF in under 60 seconds</li>
+                </ul>
+            </div>
+
+            <div class="why-badges reveal">
+                <div class="badge-card">
+                    <div class="badge-icon">🔒</div>
+                    <h4>100% Secure</h4>
+                    <p>All processing runs locally in your browser. Zero data uploaded.</p>
+                </div>
+                <div class="badge-card">
+                    <div class="badge-icon">⚡</div>
+                    <h4>Lightning Fast</h4>
+                    <p>Instant PDF generation — no waiting, no servers.</p>
+                </div>
+                <div class="badge-card">
+                    <div class="badge-icon">🏛️</div>
+                    <h4>GST Compliant</h4>
+                    <p>HSN/SAC codes, tax calculations, and Indian billing standards.</p>
+                </div>
+                <div class="badge-card">
+                    <div class="badge-icon">🤝</div>
+                    <h4>Personal Touch</h4>
+                    <p>Real support from people who care about your success.</p>
                 </div>
             </div>
 
-            <!-- Items -->
-            <div class="card">
-                <div class="card-hd">🛠 Products / Services</div>
-                <div class="items-table-wrapper">
-                    <table class="items-table" aria-label="Bill items">
-                        <thead>
-                            <tr>
-                                <th style="width:5%">#</th>
-                                <th style="width:39%">Product / Service</th>
-                                <th style="width:10%">HSN/SAC</th>
-                                <th style="width:10%">UOM</th>
-                                <th style="width:8%">Qty</th>
-                                <th style="width:13%" class="r">Rate (₹)</th>
-                                <th style="width:12%" class="r">Total (₹)</th>
-                                <th style="width:3%"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="items-body"></tbody>
-                    </table>
-                </div>
-                <span class="field-error" id="err-items"></span>
-                <button class="btn-add-row" id="btn-add-item" type="button">+ Add New Item Row</button>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+       CTA BAND
+  ═══════════════════════════════════════════════════ -->
+    <section class="cta-band" id="billing">
+        <h2>Ready to Generate Your First Bill?</h2>
+        <p>Free, instant, and completely private — no sign-up required.</p>
+        <a href="invoice.html" class="btn-primary" id="cta-bill-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14,2 14,8 20,8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+            Open Bill Generator →
+        </a>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════════════ -->
+    <footer>
+        <div class="footer-brand">
+            <div class="footer-badge">DT</div>
+            <div>
+                <div class="footer-brand-name">Devi Technical Services</div>
+                <div class="footer-brand-tag">Smart solutions for modern businesses</div>
             </div>
+        </div>
+        <div class="footer-copy">© 2026 Devi Technical Services · devi.vntg.solutions</div>
+    </footer>
 
-            <!-- Bank Details -->
-            <div class="card">
-                <div class="card-hd">🏦 Bank Details</div>
-                <div class="fg full">
-                    <div class="field">
-                        <label for="f-bank">Select Bank Account</label>
-                        <select id="f-bank">
-                            <option value="0">Jaya Mishra — A/C 677802010011687, Union Bank, IFSC: UBIN0567787</option>
-                            <option value="1">Devi Technical Services — A/C 920020043613270, Axis Bank, IFSC:
-                                UTIB0001234</option>
-                            <option value="custom">✏️ Custom (type below)</option>
-                        </select>
-                    </div>
-                    <div class="field" id="custom-bank-field" style="display:none;">
-                        <label for="f-bankCustom">Custom Bank Details</label>
-                        <textarea id="f-bankCustom"
-                            placeholder="Account Name, Number, Bank Name, IFSC code…"></textarea>
-                    </div>
-                </div>
-            </div>
+    <!-- Scroll reveal -->
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.12 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
 
-            <!-- Actions -->
-            <div class="btn-row">
-                <button class="btn btn-primary" id="btn-preview" type="button">👁 Preview Bill</button>
-                <button class="btn btn-outline" id="btn-reset-form" type="button">↩ Clear Form</button>
-            </div>
-
-        </div><!-- /sec-form -->
-
-        <!-- ══════════════════════════════════════════════
-             TAB 2: CSV UPLOAD
-        ═══════════════════════════════════════════════ -->
-        <div class="section" id="sec-upload">
-            <div class="card" style="padding:40px;">
-                <div class="card-hd" style="border:none;justify-content:center;font-size:20px;">📤 CSV Upload</div>
-
-                <!-- Drop Zone -->
-                <div class="drop-zone" id="drop-zone" role="button" aria-label="Drop CSV file here or click to browse">
-                    <div class="drop-icon-container">
-                        <span class="drop-icon">📊</span>
-                    </div>
-                    <div class="drop-main">Drop your CSV file here</div>
-                    <div class="drop-sub">Supported format: .csv — or click to browse</div>
-                    <input type="file" id="file-input" accept=".csv" />
-                    <button class="btn btn-primary" type="button" style="margin-top:10px;" id="browse-btn">Browse
-                        Files</button>
-                </div>
-
-                <!-- Error box -->
-                <div class="error-box" id="error-box" role="alert">⚠️ <span id="error-msg"></span></div>
-
-                <div class="btn-row" style="margin-top:20px;">
-                    <a href="sample-invoice.csv" download class="btn btn-outline">📄 Download Template CSV</a>
-                </div>
-
-                <div class="notice">
-                    <span style="font-size:20px;">🛡️</span>
-                    <span>Secure Local Processing: Your data stays on your machine. No cloud storage used.</span>
-                </div>
-            </div>
-
-            <!-- CSV Preview Table (shown after successful parse) -->
-            <div id="csv-preview-wrap" style="display:none;">
-                <div class="card">
-                    <div class="card-hd">
-                        <span>📋 Parsed CSV Preview</span>
-                        <span id="csv-summary-badge" class="csv-badge"></span>
-                    </div>
-
-                    <!-- Meta info strip -->
-                    <div class="csv-meta-grid" id="csv-meta-grid"></div>
-
-                    <!-- Items preview table -->
-                    <div class="csv-table-scroll">
-                        <table class="csv-preview-table" id="csv-items-table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Description</th>
-                                    <th>HSN/SAC</th>
-                                    <th>UOM</th>
-                                    <th>Qty</th>
-                                    <th>Rate (₹)</th>
-                                    <th>Total (₹)</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="csv-items-body"></tbody>
-                        </table>
-                    </div>
-
-                    <!-- Validation summary -->
-                    <div id="csv-validation-msg" class="csv-validation-msg"></div>
-
-                    <!-- Actions -->
-                    <div class="btn-row" style="margin-top:20px;">
-                        <button class="btn btn-primary" id="btn-csv-generate" type="button">✅ Generate Bill</button>
-                        <button class="btn btn-outline" id="btn-csv-reupload" type="button">🔄 Re-upload</button>
-                    </div>
-                </div>
-            </div>
-
-        </div><!-- /sec-upload -->
-
-        <!-- ══════════════════════════════════════════════
-             PREVIEW / RESULT
-        ═══════════════════════════════════════════════ -->
-        <div class="section" id="sec-preview">
-            <div class="action-bar">
-                <div class="action-info">
-                    Bill <strong id="info-number"></strong> for <strong id="info-customer"></strong>
-                </div>
-                <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                    <button class="btn btn-outline" id="btn-back-edit"
-                        style="border-color:#fff;color:#fff;background:rgba(255,255,255,0.1);">✏️ Back to Edit</button>
-                    <button class="btn btn-primary" id="btn-download"
-                        style="background:#FCA311;color:#000;box-shadow:none;">⬇ Download PDF</button>
-                </div>
-            </div>
-
-            <div class="preview-scroll">
-                <div class="preview-scale-wrapper">
-                    <div id="invoice-render"></div>
-                </div>
-            </div>
-
-            <div class="btn-row">
-                <button class="btn btn-outline" id="btn-new2" style="background:#fff;" type="button">🗑 Start New
-                    Bill</button>
-            </div>
-        </div><!-- /sec-preview -->
-
-    </div><!-- /page -->
-
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-    <script src="script.js?v=7" defer></script>
 </body>
 
 </html>
