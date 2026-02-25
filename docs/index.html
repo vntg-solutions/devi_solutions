@@ -6,19 +6,162 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Devi Technical Services — Photocopier & Printer Rental</title>
     <meta name="description"
-        content="Devi Technical Services offers reliable photocopier and printer rental solutions for offices and businesses across India. Flexible plans, genuine consumables, on-site support." />
+        content="Devi Technical Services offers reliable photocopier and printer rental solutions for offices across India. Flexible plans, genuine consumables, on-site support." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="landing.css" />
+    <style>
+        /* ── Hamburger Menu ── */
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .hamburger:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .hamburger span {
+            display: block;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+
+        .hamburger.open span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .hamburger.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.open span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 8px;
+            min-width: 200px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            animation: dropIn 0.2s ease;
+        }
+
+        .dropdown-menu.open {
+            display: block;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+        }
+
+        .dropdown-menu a svg {
+            flex-shrink: 0;
+            opacity: 0.7;
+        }
+
+        .nav-right {
+            position: relative;
+        }
+
+        /* ── Mobile responsive fixes ── */
+        @media (max-width: 600px) {
+            .hero {
+                padding: 100px 5% 60px;
+            }
+
+            .hero h1 {
+                font-size: 1.9rem;
+                letter-spacing: -1px;
+            }
+
+            .hero p {
+                font-size: 0.95rem;
+            }
+
+            .hero-stats {
+                gap: 20px;
+            }
+
+            .stat-num {
+                font-size: 1.5rem;
+            }
+
+            .hero-btns {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .why-badges {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .cta-band h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- ══════════════════════════════════════════════════
-       NAVBAR
-  ═══════════════════════════════════════════════════ -->
+    <!-- ══ NAVBAR ══ -->
     <nav class="navbar">
         <a href="#" class="nav-logo" aria-label="Devi Technical Services Home">
             <div class="nav-logo-badge">DT</div>
@@ -27,28 +170,36 @@
                 <span>Photocopier &amp; Printer Rental</span>
             </div>
         </a>
-        <a href="invoice.html" class="nav-cta" id="nav-bill-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14,2 14,8 20,8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-            </svg>
-            Bill Generator
-        </a>
+
+        <div class="nav-right">
+            <!-- 3-bar hamburger -->
+            <div class="hamburger" id="hamburger" aria-label="Menu" role="button" tabindex="0">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <!-- Dropdown -->
+            <div class="dropdown-menu" id="dropdown-menu">
+                <a href="invoice.html" id="menu-bill-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14,2 14,8 20,8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    Bill Generator
+                </a>
+            </div>
+        </div>
     </nav>
 
-    <!-- ══════════════════════════════════════════════════
-       HERO
-  ═══════════════════════════════════════════════════ -->
+    <!-- ══ HERO ══ -->
     <section class="hero" id="hero">
         <div class="hero-bg"></div>
         <div class="hero-content">
 
-            <div class="hero-badge">
-                Trusted by Offices Across India
-            </div>
+            <div class="hero-badge">Trusted by Offices Across India</div>
 
             <h1>
                 Photocopier &amp; Printer Rental<br />
@@ -56,23 +207,13 @@
             </h1>
 
             <p>
-                Get high-quality Canon, Ricoh, and HP photocopiers and printers on
-                flexible monthly rental plans — with genuine consumables, on-site
-                service, and zero hassle.
+                High-quality Canon, Ricoh, and HP photocopiers and printers on
+                flexible monthly rental plans — with genuine consumables and on-site service.
             </p>
 
             <div class="hero-btns">
-                <a href="#services" class="btn-primary" id="hero-services-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8" />
-                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                    </svg>
-                    Explore Our Plans
-                </a>
-                <a href="#contact" class="btn-secondary" id="hero-contact-btn">
-                    Get a Quote ↓
-                </a>
+                <a href="#services" class="btn-primary" id="hero-services-btn">Explore Our Plans ↓</a>
+                <a href="#contact" class="btn-secondary" id="hero-contact-btn">Get a Quote</a>
             </div>
 
             <div class="hero-stats">
@@ -97,9 +238,7 @@
         </div>
     </section>
 
-    <!-- ══════════════════════════════════════════════════
-       SERVICES
-  ═══════════════════════════════════════════════════ -->
+    <!-- ══ SERVICES ══ -->
     <section class="services" id="services">
         <div class="services-header reveal">
             <span class="section-label">What We Offer</span>
@@ -107,158 +246,82 @@
             <p class="section-sub">Everything your office needs to print, copy, and scan — without the burden of
                 ownership.</p>
         </div>
-
         <div class="services-grid">
-
             <div class="service-card reveal">
                 <div class="service-icon" style="background:rgba(59,130,246,0.12);">🖨️</div>
                 <h3>Photocopier Rental</h3>
-                <p>High-speed Canon, Ricoh & Konica Minolta multifunction photocopiers available on monthly rental.
-                    Perfect for offices of all sizes — print, copy, scan, and fax in one machine.</p>
+                <p>High-speed Canon, Ricoh &amp; Konica Minolta multifunction photocopiers on monthly rental. Print,
+                    copy, scan, and fax in one machine.</p>
             </div>
-
             <div class="service-card reveal">
                 <div class="service-icon" style="background:rgba(6,182,212,0.12);">🖧</div>
                 <h3>Network Printer Rental</h3>
                 <p>Laser and inkjet printers with full network connectivity — wired and wireless. Share across your
-                    entire office floor with ease and maximum uptime.</p>
+                    entire office floor.</p>
             </div>
-
             <div class="service-card reveal">
                 <div class="service-icon" style="background:rgba(245,158,11,0.12);">🔧</div>
-                <h3>Maintenance & Repair</h3>
-                <p>Regular preventive maintenance and on-call repair service included with every rental plan. Certified
-                    technicians come to your office so your workflow never stops.</p>
+                <h3>Maintenance &amp; Repair</h3>
+                <p>Regular preventive maintenance and on-call repair included with every plan. Certified technicians
+                    visit your office.</p>
             </div>
-
             <div class="service-card reveal">
                 <div class="service-icon" style="background:rgba(139,92,246,0.12);">🗳️</div>
-                <h3>Cartridge & Consumable Supply</h3>
-                <p>Genuine OEM toner cartridges, drums, and consumables supplied and replaced at your location. No more
-                    running out of ink at critical moments.</p>
+                <h3>Cartridge &amp; Consumable Supply</h3>
+                <p>Genuine OEM toner cartridges and consumables supplied and replaced at your location.</p>
             </div>
-
         </div>
     </section>
 
-    <!-- ══════════════════════════════════════════════════
-       WHY US
-  ═══════════════════════════════════════════════════ -->
+    <!-- ══ WHY US ══ -->
     <section class="why" id="why">
         <div class="why-inner">
-
             <div class="why-text reveal">
                 <span class="section-label">Why Choose Us</span>
-                <h2 class="section-title">Why Businesses<br />Rent from Us</h2>
-                <p class="section-sub">Owning a photocopier means maintenance headaches, depreciation, and Capital
-                    expenses. Renting means none of that.</p>
-
+                <h2 class="section-title">Why Businesses Rent from Us</h2>
+                <p class="section-sub">Renting means no capital investment, no depreciation, and no maintenance
+                    headaches.</p>
                 <ul class="why-list">
                     <li>No large upfront capital investment — pay only monthly</li>
-                    <li>Latest machines, always — upgrade anytime on your plan</li>
-                    <li>All maintenance and repairs included, at no extra cost</li>
-                    <li>Genuine consumables (toner, cartridges) delivered to your door</li>
-                    <li>Flexible contract terms — monthly, quarterly, or annual</li>
+                    <li>Latest machines — upgrade anytime on your plan</li>
+                    <li>All maintenance and repairs included at no extra cost</li>
+                    <li>Genuine consumables delivered to your door</li>
                     <li>On-site setup, installation, and staff training included</li>
                 </ul>
             </div>
-
             <div class="why-badges reveal">
                 <div class="badge-card">
                     <div class="badge-icon">⚡</div>
                     <h4>Fast Delivery</h4>
-                    <p>Machine installed at your office within 48 hours of agreement.</p>
+                    <p>Machine installed within 48 hours of agreement.</p>
                 </div>
                 <div class="badge-card">
                     <div class="badge-icon">🏷️</div>
                     <h4>Flexible Plans</h4>
-                    <p>Monthly rental plans designed for small offices to large corporates.</p>
+                    <p>Monthly plans for small offices to large corporates.</p>
                 </div>
                 <div class="badge-card">
                     <div class="badge-icon">🛠️</div>
                     <h4>On-Site Support</h4>
-                    <p>Certified technician visits your office — no carrying machines anywhere.</p>
+                    <p>Certified technician visits — no carrying machines anywhere.</p>
                 </div>
                 <div class="badge-card">
                     <div class="badge-icon">✅</div>
                     <h4>Genuine Parts</h4>
-                    <p>Only OEM-certified toners and parts for better print quality and machine life.</p>
+                    <p>Only OEM-certified toners and parts for best quality.</p>
                 </div>
             </div>
-
         </div>
     </section>
 
-    <!-- ══════════════════════════════════════════════════
-       MACHINES
-  ═══════════════════════════════════════════════════ -->
-    <section class="services" id="machines" style="background: var(--bg);">
-        <div class="services-header reveal">
-            <span class="section-label">Our Equipment</span>
-            <h2 class="section-title">Machines We Offer</h2>
-            <p class="section-sub">Leading brands, professionally maintained, deployed across hundreds of offices.</p>
-        </div>
-
-        <div class="services-grid">
-
-            <div class="service-card reveal">
-                <div class="service-icon"
-                    style="background:rgba(220,38,38,0.1); font-size:20px; font-weight:800; color:#ef4444; letter-spacing:-1px;">
-                    C</div>
-                <h3>Canon Photocopiers</h3>
-                <p>Canon IR series (IR-2525, IR-3225, IR-ADV) — fast, reliable A3/A4 multifunction machines for
-                    heavy-duty office use. Print speeds up to 35 ppm.</p>
-            </div>
-
-            <div class="service-card reveal">
-                <div class="service-icon"
-                    style="background:rgba(59,130,246,0.12); font-size:20px; font-weight:800; color:#3b82f6; letter-spacing:-1px;">
-                    R</div>
-                <h3>Ricoh Copiers</h3>
-                <p>Ricoh MP series — energy efficient, network-ready, and built for high-volume copying. Ideal for
-                    printing departments and administrative offices.</p>
-            </div>
-
-            <div class="service-card reveal">
-                <div class="service-icon"
-                    style="background:rgba(6,182,212,0.12); font-size:18px; font-weight:800; color:#06b6d4; letter-spacing:-1px;">
-                    HP</div>
-                <h3>HP Laser Printers</h3>
-                <p>HP LaserJet Pro series — compact, network-connected printers for offices that need high-quality
-                    prints at speed without breaking the bank.</p>
-            </div>
-
-            <div class="service-card reveal">
-                <div class="service-icon" style="background:rgba(245,158,11,0.12);">➕</div>
-                <h3>Other Brands</h3>
-                <p>Konica Minolta, Kyocera, Samsung, and more available on request. We source the right machine for your
-                    specific print volume and requirements.</p>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- ══════════════════════════════════════════════════
-       CTA BAND
-  ═══════════════════════════════════════════════════ -->
+    <!-- ══ CTA ══ -->
     <section class="cta-band" id="contact">
         <h2>Ready to Rent a Machine for Your Office?</h2>
-        <p>Get in touch for a custom quote — flexible plans, no hidden charges.</p>
-        <a href="invoice.html" class="btn-primary" id="cta-bill-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14,2 14,8 20,8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-            </svg>
-            Generate a Bill →
-        </a>
+        <p>Flexible plans, no hidden charges — get in touch for a custom quote.</p>
+        <a href="tel:+91XXXXXXXXXX" class="btn-primary" id="cta-contact-btn">📞 Contact Us</a>
     </section>
 
-    <!-- ══════════════════════════════════════════════════
-       FOOTER
-  ═══════════════════════════════════════════════════ -->
+    <!-- ══ FOOTER ══ -->
     <footer>
         <div class="footer-brand">
             <div class="footer-badge">DT</div>
@@ -270,12 +333,27 @@
         <div class="footer-copy">© 2026 Devi Technical Services · devi.vntg.solutions</div>
     </footer>
 
-    <!-- Scroll reveal -->
     <script>
+        // Scroll reveal
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-        }, { threshold: 0.12 });
+        }, { threshold: 0.1 });
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Hamburger toggle
+        const hamburger = document.getElementById('hamburger');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('open');
+            dropdownMenu.classList.toggle('open');
+        });
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!hamburger.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                hamburger.classList.remove('open');
+                dropdownMenu.classList.remove('open');
+            }
+        });
     </script>
 
 </body>
