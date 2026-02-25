@@ -1008,26 +1008,23 @@ nav {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    right: 0;
+    bottom: 0;
     background: #0f172a;
     z-index: 10000;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    box-sizing: border-box;
-    padding: 24px 16px;
     color: #fff;
-    /* Use grid for universal centering across all mobile browsers */
-    display: grid;
-    place-items: center;
 }
 
 .gate-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background: #1e293b;
     padding: 36px 28px;
     border-radius: 16px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .6);
-    width: 100%;
+    width: calc(100% - 48px);
     max-width: 360px;
     text-align: center;
     display: flex;
