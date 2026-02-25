@@ -1006,7 +1006,13 @@ nav {
 ───────────────────────────────────────────────────────────────── */
 #security-gate {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
     background: #0f172a;
     z-index: 10000;
     display: flex;
@@ -1014,6 +1020,8 @@ nav {
     justify-content: center;
     color: #fff;
     padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
 }
 
 .gate-card {
@@ -1027,6 +1035,8 @@ nav {
     display: flex;
     flex-direction: column;
     gap: 0;
+    margin: auto;
+    flex-shrink: 0;
 }
 
 .gate-logo {
@@ -1220,5 +1230,14 @@ nav {
 
     .progress-card {
         padding: 32px 24px;
+    }
+
+    .gate-card {
+        padding: 28px 16px;
+        border-radius: 12px;
+    }
+
+    .gate-card h2 {
+        font-size: 18px;
     }
 }
